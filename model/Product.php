@@ -80,12 +80,12 @@ class Product extends BaseModel
             $result = $this->getDb()->insert(Product::getTableName(), $attributes);
         }
 
-        if ($this->getStatus() === self::STATUS_UPDATE && $this->getStatus() === self::STATUS_LOAD) {
+        if ($this->getStatus() === self::STATUS_UPDATE || $this->getStatus() === self::STATUS_LOAD) {
             $result = $this->getDb()->update(Product::getTableName(), $attributes, "id = {$this->getId()}");
         }
 
         if ($result !== true) {
-            throw new \Exception('Error in save function class Product');
+            throw new \Exception('Error in save function: class Product');
         }
 
         return [];
