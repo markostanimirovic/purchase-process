@@ -4,6 +4,7 @@ namespace model;
 
 
 use common\base\BaseModel;
+use modelRepository\SupplierRepository;
 
 class OrderForm extends BaseModel
 {
@@ -11,34 +12,22 @@ class OrderForm extends BaseModel
     private $date;
     private $supplier;
 
-    /**
-     * @return string
-     */
     public function getCode()
     {
         return $this->code;
     }
 
-    /**
-     * @param string $code
-     */
-    public function setCode($code)
+    public function setCode(string $code)
     {
         $this->code = $code;
     }
 
-    /**
-     * @return mixed
-     */
     public function getDate()
     {
         return $this->date;
     }
 
-    /**
-     * @param mixed $date
-     */
-    public function setDate($date)
+    public function setDate(string $date)
     {
         $this->date = $date;
     }
@@ -51,27 +40,17 @@ class OrderForm extends BaseModel
         return $this->supplier;
     }
 
-    /**
-     * @param Supplier $supplier
-     */
-    public function setDobavljac($supplier)
+    public function setSupplier(Supplier $supplier)
     {
         $this->supplier = $supplier;
     }
 
-    public function save(): array
+    public function populate(array $dbRow): BaseModel
     {
-        // TODO: Implement save() method.
-    }
-
-    public function delete(): bool
-    {
-        // TODO: Implement delete() method.
-    }
-
-    protected function validate(): array
-    {
-        // TODO: Implement validate() method.
+        $this->setCode($dbRow['code']);
+        $this->setDate($dbRow['date']);
+        $this->setSupplier((new SupplierRepository())->loadById($dbRow['supplier_id']));
+        return parent::populate($dbRow);
     }
 
     public function getFieldMapping(): array
@@ -81,16 +60,19 @@ class OrderForm extends BaseModel
                 'code' => array(
                     'columnName' => 'code',
                     'columnType' => \PDO::PARAM_STR,
-                    'columnSize' => 50
+                    'columnSize' => 50,
+                    'columnValue' => $this->getCode()
                 ),
                 'date' => array(
                     'columnName' => 'date',
-                    'columnType' => \PDO::PARAM_STR
+                    'columnType' => \PDO::PARAM_STR,
+                    'columnValue' => $this->getDate()
                 ),
                 'supplier' => array(
                     'columnName' => 'supplier_id',
                     'columnType' => \PDO::PARAM_INT,
-                    'columnSize' => 10
+                    'columnSize' => 10,
+                    'columnValue' => $this->getSupplier()->getId()
                 )
             ),
             parent::getFieldMapping()
@@ -100,5 +82,10 @@ class OrderForm extends BaseModel
     public static function getTableName(): string
     {
         return 'order_form';
+    }
+
+    protected function validate(): array
+    {
+        return [];
     }
 }

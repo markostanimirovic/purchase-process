@@ -3,7 +3,6 @@
 namespace modelRepository;
 
 
-use common\base\BaseModel;
 use common\base\BaseModelRepository;
 use model\Product;
 

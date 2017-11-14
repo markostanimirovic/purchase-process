@@ -7,13 +7,12 @@ use common\DBBroker;
 abstract class BaseModel
 {
     const STATUS_INSERT = 1;
-    const STATUS_UPDATE = 2;
-    const STATUS_LOAD = 3;
+    const STATUS_LOAD = 2;
     const ACTIVATE = 0;
     const DEACTIVATE = 1;
     const DEFAULT_VERSION = 1;
 
-    private $possibleStatus = [self::STATUS_INSERT, self::STATUS_UPDATE, self::STATUS_LOAD];
+    private $possibleStatus = [self::STATUS_INSERT, self::STATUS_LOAD];
     private $possibleDeactivated = [self::ACTIVATE, self::DEACTIVATE];
 
     private $db;
@@ -82,13 +81,44 @@ abstract class BaseModel
         $this->status = $status;
     }
 
-    public abstract function save(): array;
+    public function save(bool $noValidate = false): array
+    {
+        if (!$noValidate) {
+            $result = $this->validate();
+            if (!empty($result)) {
+                return $result;
+            }
+        }
 
-    public abstract function delete(): bool;
+        $attributes = $this->getFieldMapping();
+        unset($attributes['id']);
 
-    protected abstract function validate(): array;
+        if ($this->getStatus() === self::STATUS_INSERT) {
+            $result = $this->getDb()->insert(get_class($this)::getTableName(), $attributes);
+        } else {
+            $result = $this->getDb()->update(get_class($this)::getTableName(), $attributes, "id = {$this->getId()}");
+        }
 
-    public function populate(array $dbRow): BaseModel {
+        if ($result !== true) {
+            throw new \Exception('Error in save function: BaseModel');
+        }
+
+        return [];
+    }
+
+    public function deactivate(): bool
+    {
+        $this->setDeactivated(self::DEACTIVATE);
+        $result = $this->save(true);
+
+        if ($result) {
+            return true;
+        }
+        return false;
+    }
+
+    public function populate(array $dbRow): BaseModel
+    {
         $this->setId($dbRow['id']);
         $this->setVersion($dbRow['version']);
         $this->setDeactivated($dbRow['deactivated']);
@@ -120,4 +150,6 @@ abstract class BaseModel
     }
 
     public static abstract function getTableName(): string;
+
+    protected abstract function validate(): array;
 }

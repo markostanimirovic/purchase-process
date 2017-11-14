@@ -43,7 +43,7 @@ class DBBroker
         $this->pdo = null;
     }
 
-    public function StartTransaction()
+    public function startTransaction()
     {
         $this->pdo->beginTransaction();
     }

@@ -4,63 +4,43 @@ namespace model;
 
 
 use common\base\BaseModel;
+use common\base\BaseModelRepository;
 
 class Supplier extends BaseModel
 {
     private $name;
-    private $adress;
+    private $address;
 
     public function __construct()
     {
         parent::__construct();
     }
 
-
-    /**
-     * @return string
-     */
     public function getName()
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName($name)
+    public function setName(string $name)
     {
         $this->name = $name;
     }
 
-    /**
-     * @return string
-     */
-    public function getAdress()
+    public function getAddress()
     {
-        return $this->adress;
+        return $this->address;
     }
 
-    /**
-     * @param string $adress
-     */
-    public function setAdress($adress)
+    public function setAddress(string $address)
     {
-        $this->adress = $adress;
+        $this->address = $address;
     }
 
-    public function save(): array
+    public function populate(array $dbRow): BaseModel
     {
-
-    }
-
-    public function delete(): bool
-    {
-        return true;
-    }
-
-    protected function validate(): array
-    {
-        return [];
+        $this->setName($dbRow['name']);
+        $this->setAddress($dbRow['address']);
+        return parent::populate($dbRow);
     }
 
     public function getFieldMapping(): array
@@ -70,12 +50,14 @@ class Supplier extends BaseModel
                 'name' => array(
                     'columnName' => 'name',
                     'columnType' => \PDO::PARAM_STR,
-                    'columnSize' => 50
+                    'columnSize' => 50,
+                    'columnValue' => $this->getName()
                 ),
-                'adress' => array(
-                    'columnName' => 'adress',
+                'address' => array(
+                    'columnName' => 'address',
                     'columnType' => \PDO::PARAM_STR,
-                    'columnSize' => 100
+                    'columnSize' => 100,
+                    'columnValue' => $this->getAddress()
                 )
             ),
             parent::getFieldMapping()
@@ -85,5 +67,10 @@ class Supplier extends BaseModel
     public static function getTableName(): string
     {
         return 'supplier';
+    }
+
+    protected function validate(): array
+    {
+        return [];
     }
 }

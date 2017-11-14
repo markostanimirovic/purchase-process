@@ -3,7 +3,18 @@
 namespace modelRepository;
 
 
-class OrderFormRepository
-{
+use common\base\BaseModelRepository;
+use model\OrderForm;
 
+class OrderFormRepository extends BaseModelRepository
+{
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    protected function getModelClassName(): string
+    {
+        return OrderForm::class;
+    }
 }

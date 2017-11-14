@@ -79,7 +79,7 @@ CREATE TABLE `supplier` (
   `version` int(10) unsigned DEFAULT '1',
   `deactivated` tinyint(1) DEFAULT '0',
   `name` varchar(50) DEFAULT NULL,
-  `adress` varchar(100) DEFAULT NULL,
+  `address` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
