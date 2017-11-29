@@ -1,5 +1,5 @@
 <?php
-$title = '404 Not Found';
+$title = 'Greška 404';
 
 ob_start();
 ?>
@@ -7,13 +7,12 @@ ob_start();
     <div class="row">
         <div class="col-md-12">
             <div class="text-danger error-template">
-                <p class="h1">Oops!</p>
-                <p class="h2">404 Not Found</p>
+                <p class="h1">Greška 404</p>
                 <div class="error-details">
-                    Sorry, an error has occured, Requested page not found!
+                    <p class="h4">Tražena stranica ne postoji!</p>
                 </div>
                 <div class="error-actions">
-                    <a href="/" class="btn btn-outline-danger btn-lg">Home Page</a>
+                    <a href="/" class="btn btn-outline-danger btn-lg">Početna stranica</a>
                 </div>
             </div>
         </div>

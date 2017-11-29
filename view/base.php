@@ -23,11 +23,9 @@
 </div>
 <div class="footer container">
         <hr>
-        <span class="text-muted">© Marko Stanimirović FON 2017</span>
+        <span class="text-muted">© 2017 Marko Stanimirović FON</span>
 </div>
 <?= render('global/javascript.php'); ?>
 <?php if (isset($javascript)) echo $javascript; ?>
 </body>
 </html>
-
-//asasdasdasdsd

@@ -1,24 +1,21 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: PC Servis
- * Date: 11/6/2017
- * Time: 1:50 AM
- */
 
 namespace controller;
 
 
-class SupplierController
+use common\base\BaseController;
+
+class SupplierController extends BaseController
 {
     public function indexAction()
     {
-        echo '`iasdasd` Index';
+
     }
 
     public function insertAction()
     {
-
+        $menu = $this->render('menu/main_menu.php');
+        echo $this->render('supplier/insert.php', array('menu' => $menu));
     }
 
     public function editAction()

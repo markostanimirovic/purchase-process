@@ -34,3 +34,8 @@ body {
 .error-actions .btn {
     margin-right: 10px;
 }
+
+/* cards color */
+.card {
+    background-color: #f7f7f9;
+}
