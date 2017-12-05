@@ -18,7 +18,7 @@
 <div class="header">
     <?php if (isset($header)) echo $header; ?>
 </div>
-<div class="body container">
+<div class="body">
     <?php if (isset($content)) echo $content; ?>
 </div>
 <div class="footer container">

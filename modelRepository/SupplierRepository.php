@@ -3,10 +3,9 @@
 namespace modelRepository;
 
 
-use common\base\BaseModelRepository;
 use model\Supplier;
 
-class SupplierRepository extends BaseModelRepository
+class SupplierRepository extends UserRepository
 {
     public function __construct()
     {

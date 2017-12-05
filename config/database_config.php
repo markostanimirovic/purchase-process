@@ -4,5 +4,5 @@ return array(
     'port' => '3306',
     'username' => 'root',
     'password' => '',
-    'schema' => 'iteh'
+    'schema' => 'purchase_process'
 );

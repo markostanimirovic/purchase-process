@@ -1,6 +1,6 @@
 /*
 SQLyog Ultimate v11.11 (64 bit)
-MySQL - 5.5.5-10.1.21-MariaDB : Database - iteh
+MySQL - 5.5.5-10.1.21-MariaDB : Database - purchase_process
 *********************************************************************
 */
 
@@ -12,9 +12,46 @@ MySQL - 5.5.5-10.1.21-MariaDB : Database - iteh
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`iteh` /*!40100 DEFAULT CHARACTER SET latin1 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/`purchase_process` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
-USE `iteh`;
+USE `purchase_process`;
+
+/*Table structure for table `catalog` */
+
+DROP TABLE IF EXISTS `catalog`;
+
+CREATE TABLE `catalog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `version` int(10) unsigned DEFAULT '1',
+  `deactivated` tinyint(1) DEFAULT '0',
+  `code` varchar(20) DEFAULT NULL,
+  `supplier_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UNIQUE_COLUMNS` (`code`),
+  KEY `supplier_fk` (`supplier_id`),
+  CONSTRAINT `supplier_fk` FOREIGN KEY (`supplier_id`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `catalog` */
+
+/*Table structure for table `catalog_item` */
+
+DROP TABLE IF EXISTS `catalog_item`;
+
+CREATE TABLE `catalog_item` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `version` int(10) unsigned DEFAULT '1',
+  `deactivated` tinyint(1) DEFAULT '0',
+  `catalog_id` int(10) unsigned DEFAULT NULL,
+  `product_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `catalog_i_fk` (`catalog_id`),
+  KEY `product_i_fk` (`product_id`),
+  CONSTRAINT `catalog_i_fk` FOREIGN KEY (`catalog_id`) REFERENCES `catalog` (`id`),
+  CONSTRAINT `product_i_fk` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `catalog_item` */
 
 /*Table structure for table `order_form` */
 
@@ -26,10 +63,12 @@ CREATE TABLE `order_form` (
   `deactivated` tinyint(1) DEFAULT '0',
   `code` varchar(20) DEFAULT NULL,
   `date` date DEFAULT NULL,
-  `supplier_id` int(10) unsigned DEFAULT NULL,
+  `total_price` decimal(12,2) DEFAULT NULL,
+  `catalog_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `supplier_fk` (`supplier_id`),
-  CONSTRAINT `supplier_fk` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`)
+  UNIQUE KEY `UNIQUE_COLUMNS` (`code`),
+  KEY `catalog_fk` (`catalog_id`),
+  CONSTRAINT `catalog_fk` FOREIGN KEY (`catalog_id`) REFERENCES `catalog` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `order_form` */
@@ -40,19 +79,33 @@ DROP TABLE IF EXISTS `order_form_item`;
 
 CREATE TABLE `order_form_item` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `version` int(10) unsigned DEFAULT NULL,
+  `version` int(10) unsigned DEFAULT '1',
   `deactivated` tinyint(1) DEFAULT '0',
   `quantity` int(10) DEFAULT NULL,
-  `order_form_id` int(10) unsigned NOT NULL,
-  `product_id` int(10) unsigned DEFAULT NULL,
+  `order_form_id` int(10) unsigned DEFAULT NULL,
+  `catalog_item_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `order_form_fk` (`order_form_id`),
-  KEY `product_fk` (`product_id`),
-  CONSTRAINT `order_form_fk` FOREIGN KEY (`order_form_id`) REFERENCES `order_form` (`id`),
-  CONSTRAINT `product_fk` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
+  KEY `order_form_i_fk` (`order_form_id`),
+  KEY `catalog_item_i_fk` (`catalog_item_id`),
+  CONSTRAINT `catalog_item_i_fk` FOREIGN KEY (`catalog_item_id`) REFERENCES `catalog_item` (`id`),
+  CONSTRAINT `order_form_i_fk` FOREIGN KEY (`order_form_id`) REFERENCES `order_form` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `order_form_item` */
+
+/*Table structure for table `place` */
+
+DROP TABLE IF EXISTS `place`;
+
+CREATE TABLE `place` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `version` int(10) unsigned DEFAULT '1',
+  `deactivated` tinyint(1) DEFAULT '0',
+  `name` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `place` */
 
 /*Table structure for table `product` */
 
@@ -62,28 +115,65 @@ CREATE TABLE `product` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `version` int(10) unsigned DEFAULT '1',
   `deactivated` tinyint(1) DEFAULT '0',
+  `code` varchar(20) DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
-  `price` decimal(12,2) DEFAULT NULL,
-  `unit` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `unit` enum('komad','litar','kilogram') DEFAULT NULL,
+  `supplier_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UNIQUE_COLUMNS` (`code`),
+  KEY `supplier_fk1` (`supplier_id`),
+  CONSTRAINT `supplier_fk1` FOREIGN KEY (`supplier_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `product` */
 
-/*Table structure for table `supplier` */
+/*Table structure for table `product_price` */
 
-DROP TABLE IF EXISTS `supplier`;
+DROP TABLE IF EXISTS `product_price`;
 
-CREATE TABLE `supplier` (
+CREATE TABLE `product_price` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `version` int(10) unsigned DEFAULT '1',
   `deactivated` tinyint(1) DEFAULT '0',
-  `name` varchar(50) DEFAULT NULL,
-  `address` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `date_from` date DEFAULT NULL,
+  `date_to` date DEFAULT NULL,
+  `price` decimal(12,2) DEFAULT NULL,
+  `product_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `product_p_fk` (`product_id`),
+  CONSTRAINT `product_p_fk` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*Data for the table `supplier` */
+/*Data for the table `product_price` */
+
+/*Table structure for table `user` */
+
+DROP TABLE IF EXISTS `user`;
+
+CREATE TABLE `user` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `version` int(10) unsigned DEFAULT '1',
+  `deactivated` tinyint(1) DEFAULT '0',
+  `username` varchar(30) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL,
+  `password` varchar(30) DEFAULT NULL,
+  `role` enum('administrator','employee','supplier') DEFAULT NULL,
+  `administrator_name` varchar(50) DEFAULT NULL,
+  `employee_name` varchar(50) DEFAULT NULL,
+  `employee_surname` varchar(50) DEFAULT NULL,
+  `employee_position` varchar(50) DEFAULT NULL,
+  `supplier_name` varchar(50) DEFAULT NULL,
+  `supplier_pib` varchar(9) DEFAULT NULL,
+  `supplier_street` varchar(50) DEFAULT NULL,
+  `supplier_street_number` varchar(10) DEFAULT NULL,
+  `supplier_place_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UNIQUE_COLUMNS` (`username`,`email`),
+  KEY `place_fk` (`supplier_place_id`),
+  CONSTRAINT `place_fk` FOREIGN KEY (`supplier_place_id`) REFERENCES `place` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `user` */
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

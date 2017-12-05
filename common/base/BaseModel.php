@@ -17,10 +17,10 @@ abstract class BaseModel
 
     private $db;
 
-    private $id;
-    private $version;
-    private $deactivated;
-    private $status;
+    protected $id;
+    protected $version;
+    protected $deactivated;
+    protected $status;
 
     public function __construct()
     {
@@ -35,7 +35,7 @@ abstract class BaseModel
         return $this->db;
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -81,9 +81,9 @@ abstract class BaseModel
         $this->status = $status;
     }
 
-    public function save(bool $noValidate = false): array
+    public function save(bool $validate = true): array
     {
-        if (!$noValidate) {
+        if ($validate) {
             $result = $this->validate();
             if (!empty($result)) {
                 return $result;
@@ -109,9 +109,9 @@ abstract class BaseModel
     public function deactivate(): bool
     {
         $this->setDeactivated(self::DEACTIVATE);
-        $result = $this->save(true);
+        $result = $this->save(false);
 
-        if ($result) {
+        if (empty($result)) {
             return true;
         }
         return false;
@@ -130,18 +130,18 @@ abstract class BaseModel
     {
         return array(
             'id' => array(
-                'columnName' => 'id',
+                'columnName' => '`id`',
                 'columnType' => \PDO::PARAM_INT,
                 'columnSize' => 10
             ),
             'version' => array(
-                'columnName' => 'version',
+                'columnName' => '`version`',
                 'columnType' => \PDO::PARAM_INT,
                 'columnSize' => 10,
                 'columnValue' => $this->getVersion()
             ),
             'deactivated' => array(
-                'columnName' => 'deactivated',
+                'columnName' => '`deactivated`',
                 'columnType' => \PDO::PARAM_INT,
                 'columnSize' => 1,
                 'columnValue' => $this->getDeactivated()

@@ -4,9 +4,8 @@ namespace modelRepository;
 
 
 use common\base\BaseModelRepository;
-use model\OrderFormItem;
 
-class OrderFormItemRepository extends BaseModelRepository
+class UserRepository extends BaseModelRepository
 {
     public function __construct()
     {
@@ -15,6 +14,6 @@ class OrderFormItemRepository extends BaseModelRepository
 
     protected function getModelClassName(): string
     {
-        return OrderFormItem::class;
+        return User::class;
     }
 }

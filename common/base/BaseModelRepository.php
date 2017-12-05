@@ -37,9 +37,13 @@ abstract class BaseModelRepository
         return new $modelClassName;
     }
 
-    public function loadById(int $id): ?BaseModel
+    public function loadById(int $id, bool $onlyActive = true): ?BaseModel
     {
         $query = "SELECT * FROM {$this->getTableName()} WHERE id = {$id}";
+
+        if ($onlyActive) {
+            $query .= " AND deactivated = 0";
+        }
 
         $dbRow = $this->getDb()->query($query, true);
         if (!empty($dbRow)) {
@@ -49,10 +53,17 @@ abstract class BaseModelRepository
         return null;
     }
 
-    public function loadOne(string $whereCondition = null): ?BaseModel
+    public function loadOne(bool $onlyActive = true, string $whereCondition = null): ?BaseModel
     {
         $query = "SELECT * FROM {$this->getTableName()}";
-        if (!empty($whereCondition)) {
+
+        if ($onlyActive) {
+            $query .= " WHERE deactivated = 0";
+        }
+
+        if (!empty($whereCondition) && $onlyActive) {
+            $query .= " AND {$whereCondition}";
+        } else if (!empty($whereCondition) && !$onlyActive) {
             $query .= " WHERE {$whereCondition}";
         }
 
@@ -64,11 +75,17 @@ abstract class BaseModelRepository
         return null;
     }
 
-    public function load(string $whereCondition = null): array
+    public function load(bool $onlyActive = true, string $whereCondition = null): array
     {
 
         $query = "SELECT * FROM {$this->getTableName()}";
-        if (!empty($whereCondition)) {
+        if ($onlyActive) {
+            $query .= " WHERE deactivated = 0";
+        }
+
+        if (!empty($whereCondition) && $onlyActive) {
+            $query .= " AND {$whereCondition}";
+        } else if (!empty($whereCondition) && !$onlyActive) {
             $query .= " WHERE {$whereCondition}";
         }
 
