@@ -1,5 +1,5 @@
 <?php
-$title = 'Proces nabavke';
+$title = 'Aplikacija za proces nabavke';
 
 ob_start();
 ?>
@@ -12,4 +12,16 @@ ob_start();
 <?php
 $header = ob_get_clean();
 ob_flush();
-echo render('base.php', array_merge($params, array('title' => $title, 'header' => $header)));
+ob_start();
+?>
+    <div class="container">
+        <?php if (isset($_SESSION['message'])) {
+            echo $_SESSION['message'];
+            unset($_SESSION['message']);
+        } ?>
+    </div>
+<?php
+$content = ob_get_clean();
+ob_flush();
+
+echo render('base.php', array_merge($params, array('title' => $title, 'header' => $header, 'content' => $content)));

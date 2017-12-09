@@ -45,6 +45,11 @@ class Administrator extends User
         );
     }
 
+    public static function getTableName(): string
+    {
+        return parent::getTableName();
+    }
+
     protected function validate(): array
     {
         return [];

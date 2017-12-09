@@ -19,7 +19,7 @@ class PlaceRepository extends BaseModelRepository
         return Place::class;
     }
 
-    public function isPlaceSelectedInSupplier(int $placeId)
+    public function isPlaceSelectedInSupplier(int $placeId): bool
     {
         $placeTableName = Place::getTableName();
         $supplierTableName = Supplier::getTableName();

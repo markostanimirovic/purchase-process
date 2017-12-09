@@ -4,6 +4,7 @@ namespace model;
 
 
 use common\base\BaseModel;
+use modelRepository\UserRepository;
 
 class User extends BaseModel
 {
@@ -138,13 +139,13 @@ class User extends BaseModel
         }
 
         if (strlen($this->email) === 0) {
-            $errors['email'][] = 'Email ne sme da bude prazno polje.';
+            $errors['email'][] = 'E-mail ne sme da bude prazno polje.';
         } else if (strlen($this->email) > 50) {
-            $errors['email'][] = 'Maksimalan broj karaktera za email je 50.';
+            $errors['email'][] = 'Maksimalan broj karaktera za e-mail je 50.';
         } else if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'][] = 'Email mora biti u formatu example@example.com.';
+            $errors['email'][] = 'E-mail mora biti u formatu example@example.com.';
         } else if ($this->isDuplicateEmail()) {
-            $errors['email'][] = 'Korisnik sa unetim emailom već postoji.';
+            $errors['email'][] = 'Korisnik sa unetim e-mail-om već postoji.';
         }
 
         if (strlen($this->password) === 0) {
@@ -190,5 +191,17 @@ class User extends BaseModel
             return false;
         }
         return true;
+    }
+
+    public static function getRandomPassword()
+    {
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+        $pass = array();
+        $alphaLength = strlen($alphabet) - 1;
+        for ($i = 0; $i < 8; $i++) {
+            $n = rand(0, $alphaLength);
+            $pass[] = $alphabet[$n];
+        }
+        return implode($pass);
     }
 }

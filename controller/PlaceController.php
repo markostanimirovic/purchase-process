@@ -3,23 +3,29 @@
 namespace controller;
 
 
-use login\LoginController;
 use model\Place;
+use model\User;
 use modelRepository\PlaceRepository;
 
 class PlaceController extends LoginController
 {
+    public function __construct()
+    {
+        $this->notLoggedIn();
+        $this->accessDeny(User::ADMINISTRATOR);
+    }
+
     public function indexAction()
     {
         $params = array();
-        $params['menu'] = $this->render('menu/main_menu.php');
+        $params['menu'] = $this->render('menu/admin_menu.php');
         echo $this->render('place/index.php', $params);
     }
 
     public function insertAction()
     {
         $params = array();
-        $params['menu'] = $this->render('menu/main_menu.php');
+        $params['menu'] = $this->render('menu/admin_menu.php');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $place = new Place();
@@ -52,9 +58,6 @@ class PlaceController extends LoginController
             exit();
         }
 
-        $params = array();
-        $params['menu'] = $this->render('menu/main_menu.php');
-
         $placeRepository = new PlaceRepository();
         $place = $placeRepository->loadById($id);
 
@@ -63,15 +66,17 @@ class PlaceController extends LoginController
             exit();
         }
 
+        $params = array();
+        $params['menu'] = $this->render('menu/admin_menu.php');
         $params['place'] = $place;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $place->setZipCode($_POST['zip-code']);
             $place->setName($_POST['name']);
             $result = $place->save();
+
             if (!empty($result)) {
                 $params['errors'] = $result;
-                $params['place'] = $place;
                 $_SESSION['message'] = $this->render('global/alert.php',
                     array('type' => 'danger', 'alertText' => '<strong>Greška</strong> prilikom izmene mesta!'));
             } else {
@@ -112,6 +117,8 @@ class PlaceController extends LoginController
 
     public function getAllPlacesAction()
     {
+        header('Content-type: application/json');
+
         $jsonArray = array();
         $placeRepository = new PlaceRepository();
         $places = $placeRepository->load();
@@ -128,7 +135,9 @@ class PlaceController extends LoginController
 
     public function getAllPlacesByFilterAction()
     {
-        $filter = trim($_POST['filter']);
+        header('Content-type: application/json');
+
+        $filter = trim($_GET['filter']);
         $placeRepository = new PlaceRepository();
         $places = $placeRepository->loadByFilter($filter);
         if (empty($places)) {

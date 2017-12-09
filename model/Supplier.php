@@ -119,6 +119,11 @@ class Supplier extends User
         );
     }
 
+    public static function getTableName(): string
+    {
+        return parent::getTableName();
+    }
+
     protected function validate(): array
     {
         $errors = array();

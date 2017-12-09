@@ -198,7 +198,7 @@ ob_start();
                 placeholder: "Mesto",
                 ajax: {
                     url: '/place/getAllPlacesByFilter/',
-                    type: "POST",
+                    type: "GET",
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
