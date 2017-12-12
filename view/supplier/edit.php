@@ -86,7 +86,7 @@ ob_start();
                     </div>
                     <div class="form-group col-md-4">
                         <label for="place" class="col-form-label">Mesto <span class="text-danger">*</span></label>
-                        <select id="place" class="form-control" id="place" placeholder="Mesto" name="place">
+                        <select id="place" class="form-control" id="place" name="place">
                             <?php if (!empty($supplier) && !empty($supplier->getPlace())) { ?>
                                 <option value="<?= $supplier->getPlace()->getId(); ?>">
                                     <?= $supplier->getPlace()->getZipCode() . ' ' . $supplier->getPlace()->getName(); ?>
@@ -137,40 +137,19 @@ ob_start();
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group col-md-4">
-                        <label for="old-password" class="col-form-label">Stara lozinka</label>
-                        <input type="text" readonly class="form-control" id="old-password"
-                               value="<?= $oldPassword; ?>">
+                    <div class="form-group col-md-12">
+                        <label class="form-check-label" for="reset-password">
+                            <input type="checkbox" class="form-check-input" name="reset-password" id="reset-password"
+                                <?php if (isset($resetPassword)) echo 'checked'; ?>>
+                            Resetuj lozinku
+                        </label>
                     </div>
-                    <div class="form-group col-md-4">
-                        <label for="password" class="col-form-label">Nova lozinka</label>
-                        <input type="password" class="form-control" id="password" placeholder="Lozinka" name="password"
-                               value="<?= $supplier->getPassword(); ?>">
-                        <?php
-                        if (isset($errors['password'])) {
-                            foreach ($errors['password'] as $error) {
-                                ?>
-                                <span class="text-danger"><?php echo $error; ?></span>
-                                <?php
-                            }
-                        }
-                        ?>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <label for="repeated-password" class="col-form-label">Ponovite lozinku</label>
-                        <input type="password" class="form-control" id="repeated-password"
-                               placeholder="Ponovite lozinku" name="repeated-password"
-                               value="<?= $supplier->getRepeatedPassword(); ?>">
-                        <?php
-                        if (isset($errors['repeatedPassword'])) {
-                            foreach ($errors['repeatedPassword'] as $error) {
-                                ?>
-                                <span class="text-danger"><?php echo $error; ?></span>
-                                <?php
-                            }
-                        }
-                        ?>
-                    </div>
+                </div>
+                <div class="form-row">
+                    <label class="col-form-label text-primary">
+                        Klikom na dugme Sačuvaj dobavljač će na e-mail adresu dobiti konfiguracioni mejl sa korisničkim
+                        imenom i lozinkom.
+                    </label>
                 </div>
                 <hr>
                 <button type="submit" class="btn btn-outline-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>
@@ -188,6 +167,8 @@ $content = ob_get_clean();
 ob_flush();
 ob_start();
 ?>
+    <script src="/js/plugin/select2/select2.min.js"></script>
+
     <script>
         $(document).ready(function () {
             $('.cancel').on('click', function () {
@@ -218,5 +199,11 @@ ob_start();
 <?php
 $javascript = ob_get_clean();
 ob_flush();
+ob_start();
+?>
+    <link rel="stylesheet" href="/css/select2.min.css"/>
+<?php
+$css = ob_get_clean();
+ob_flush();
 echo render('base.php', array_merge($params,
-    array('title' => $title, 'header' => $header, 'content' => $content, 'javascript' => $javascript)));
+    array('title' => $title, 'header' => $header, 'content' => $content, 'javascript' => $javascript, 'css' => $css)));

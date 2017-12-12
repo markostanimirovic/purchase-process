@@ -148,15 +148,17 @@ class User extends BaseModel
             $errors['email'][] = 'Korisnik sa unetim e-mail-om već postoji.';
         }
 
-        if (strlen($this->password) === 0) {
-            $errors['password'][] = 'Lozinka ne sme da bude prazno polje.';
-        } else if (strlen($this->password) > 30) {
-            $errors['password'][] = 'Maksimalan broj karaktera za lozinku je 30.';
-        }
-
-        if ($this->password !== $this->repeatedPassword) {
-            $errors['repeatedPassword'][] = 'Lozinka i ponovljena lozinka se ne poklapaju.';
-        }
+//        if ($this->getStatus() !== BaseModel::STATUS_INSERT) {
+//            if (strlen($this->password) === 0) {
+//                $errors['password'][] = 'Lozinka ne sme da bude prazno polje.';
+//            } else if (strlen($this->password) > 30) {
+//                $errors['password'][] = 'Maksimalan broj karaktera za lozinku je 30.';
+//            }
+//
+//            if ($this->password !== $this->repeatedPassword) {
+//                $errors['repeatedPassword'][] = 'Lozinka i ponovljena lozinka se ne poklapaju.';
+//            }
+//        }
 
         return $errors;
     }
@@ -191,17 +193,5 @@ class User extends BaseModel
             return false;
         }
         return true;
-    }
-
-    public static function getRandomPassword()
-    {
-        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-        $pass = array();
-        $alphaLength = strlen($alphabet) - 1;
-        for ($i = 0; $i < 8; $i++) {
-            $n = rand(0, $alphaLength);
-            $pass[] = $alphabet[$n];
-        }
-        return implode($pass);
     }
 }

@@ -14,6 +14,6 @@ class AdministratorRepository extends UserRepository
 
     protected function getModelClassName(): string
     {
-        Administrator::class;
+        return Administrator::class;
     }
 }

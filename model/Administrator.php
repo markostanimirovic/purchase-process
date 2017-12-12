@@ -26,7 +26,7 @@ class Administrator extends User
 
     public function populate(array $dbRow): BaseModel
     {
-        $this->setName($dbRow['name']);
+        $this->setName($dbRow['administrator_name']);
         return parent::populate($dbRow);
     }
 

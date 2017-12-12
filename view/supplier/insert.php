@@ -137,36 +137,10 @@ ob_start();
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="password" class="col-form-label">Lozinka <span class="text-danger">*</span></label>
-                        <input type="password" class="form-control" id="password" placeholder="Lozinka" name="password"
-                               value="<?php if (isset($supplier)) echo $supplier->getPassword(); ?>">
-                        <?php
-                        if (isset($errors['password'])) {
-                            foreach ($errors['password'] as $error) {
-                                ?>
-                                <span class="text-danger"><?php echo $error; ?></span>
-                                <?php
-                            }
-                        }
-                        ?>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="repeated-password" class="col-form-label">Ponovite lozinku <span
-                                    class="text-danger">*</span></label>
-                        <input type="password" class="form-control" id="repeated-password"
-                               placeholder="Ponovite lozinku" name="repeated-password"
-                               value="<?php if (isset($supplier)) echo $supplier->getRepeatedPassword(); ?>">
-                        <?php
-                        if (isset($errors['repeatedPassword'])) {
-                            foreach ($errors['repeatedPassword'] as $error) {
-                                ?>
-                                <span class="text-danger"><?php echo $error; ?></span>
-                                <?php
-                            }
-                        }
-                        ?>
-                    </div>
+                    <label class="col-form-label text-primary">
+                        Klikom na dugme Sačuvaj dobavljač će na e-mail adresu dobiti konfiguracioni mejl sa korisničkim
+                        imenom i lozinkom.
+                    </label>
                 </div>
                 <hr>
                 <button type="submit" class="btn btn-outline-primary"><i class="fa fa-floppy-o" aria-hidden="true"></i>
@@ -184,6 +158,8 @@ $content = ob_get_clean();
 ob_flush();
 ob_start();
 ?>
+    <script src="/js/plugin/select2/select2.min.js"></script>
+
     <script>
         $(document).ready(function () {
             $('.cancel').on('click', function () {
@@ -214,5 +190,11 @@ ob_start();
 <?php
 $javascript = ob_get_clean();
 ob_flush();
+ob_start();
+?>
+    <link rel="stylesheet" href="/css/select2.min.css"/>
+<?php
+$css = ob_get_clean();
+ob_flush();
 echo render('base.php', array_merge($params,
-    array('title' => $title, 'header' => $header, 'content' => $content, 'javascript' => $javascript)));
+    array('title' => $title, 'header' => $header, 'content' => $content, 'javascript' => $javascript, 'css' => $css)));

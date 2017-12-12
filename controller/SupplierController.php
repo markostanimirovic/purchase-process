@@ -3,6 +3,8 @@
 namespace controller;
 
 
+use helper\Generator;
+use helper\Mailer;
 use model\User;
 use model\Supplier;
 use modelRepository\PlaceRepository;
@@ -33,8 +35,7 @@ class SupplierController extends LoginController
 
             $supplier->setUsername($_POST['username']);
             $supplier->setEmail($_POST['email']);
-            $supplier->setPassword($_POST['password']);
-            $supplier->setRepeatedPassword($_POST['repeated-password']);
+            $supplier->setPassword(Generator::getRandomPassword());
             $supplier->setRole(User::SUPPLIER);
 
             $supplier->setName($_POST['name']);
@@ -56,8 +57,15 @@ class SupplierController extends LoginController
                 $_SESSION['message'] = $this->render('global/alert.php',
                     array('type' => 'danger', 'alertText' => '<strong>Greška</strong> prilikom unosa novog dobavljača!'));
             } else {
-                $_SESSION['message'] = $this->render('global/alert.php',
-                    array('type' => 'success', 'alertText' => "<strong>Uspešno</strong> ste dodali dpbavljača {$supplier->getPib()} {$supplier->getName()}!"));
+                $body = '<table border="1"><tr><td>Korisničko ime</td><td>' . $supplier->getUsername() . '</td></tr><tr><td>Lozinka</td><td>' . $supplier->getPassword() . '</td></tr></table>';
+                $result = Mailer::sendMail($supplier->getEmail(), 'Konfiguracioni mejl', $body);
+                if ($result === true) {
+                    $_SESSION['message'] = $this->render('global/alert.php',
+                        array('type' => 'success', 'alertText' => "<strong>Uspešno</strong> ste dodali dobavljača {$supplier->getPib()} {$supplier->getName()}!"));
+                } else {
+                    $_SESSION['message'] = $this->render('global/alert.php',
+                        array('type' => 'danger', 'alertText' => "<strong>Greška</strong> prilikom slanja konfiguracionog mejla dobavljaču {$supplier->getPib()} {$supplier->getName()}!"));
+                }
                 header("Location: /supplier/");
                 exit();
             }
@@ -84,14 +92,16 @@ class SupplierController extends LoginController
         $params = array();
         $params['menu'] = $this->render('menu/admin_menu.php');
         $params['supplier'] = $supplier;
-        $params['oldPassword'] = $supplier->getPassword();
-        $supplier->setPassword('');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $supplier->setUsername($_POST['username']);
             $supplier->setEmail($_POST['email']);
-            $supplier->setPassword((strlen($_POST['password']) === 0) ? $params['oldPassword'] : $_POST['password']);
-            $supplier->setRepeatedPassword((strlen($_POST['repeated-password']) === 0) ? $params['oldPassword'] : $_POST['repeated-password']);
+
+            $resetPassword = (isset($_POST['reset-password'])) ? $_POST['reset-password'] : null;
+            $params['resetPassword'] = $resetPassword;
+            if (isset($resetPassword)) {
+                $supplier->setPassword(Generator::getRandomPassword());
+            }
 
             $supplier->setName($_POST['name']);
             $supplier->setPib($_POST['pib']);
@@ -107,19 +117,19 @@ class SupplierController extends LoginController
             $result = $supplier->save();
 
             if (!empty($result)) {
-                if ($supplier->getPassword() === $params['oldPassword']) {
-                    $supplier->setPassword('');
-                }
-                if ($supplier->getRepeatedPassword() === $params['oldPassword']) {
-                    $supplier->setRepeatedPassword('');
-                }
-
                 $params['errors'] = $result;
                 $_SESSION['message'] = $this->render('global/alert.php',
                     array('type' => 'danger', 'alertText' => '<strong>Greška</strong> prilikom izmene dobavljača!'));
             } else {
-                $_SESSION['message'] = $this->render('global/alert.php',
-                    array('type' => 'success', 'alertText' => "<strong>Uspešno</strong> ste izmenili dobavljača {$supplier->getPib()} {$supplier->getName()}!"));
+                $body = '<p>Administrator je menjao Vaš profil.</p><table border="1"><tr><td>Korisničko ime</td><td>' . $supplier->getUsername() . '</td></tr><tr><td>Lozinka</td><td>' . $supplier->getPassword() . '</td></tr></table>';
+                $result = Mailer::sendMail($supplier->getEmail(), 'Konfiguracioni mejl', $body);
+                if ($result === true) {
+                    $_SESSION['message'] = $this->render('global/alert.php',
+                        array('type' => 'success', 'alertText' => "<strong>Uspešno</strong> ste izmenili dobavljača {$supplier->getPib()} {$supplier->getName()}!"));
+                } else {
+                    $_SESSION['message'] = $this->render('global/alert.php',
+                        array('type' => 'danger', 'alertText' => "<strong>Greška</strong> prilikom slanja konfiguracionog mejla dobavljaču {$supplier->getPib()} {$supplier->getName()}!"));
+                }
                 header("Location: /supplier/");
                 exit();
             }

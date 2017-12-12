@@ -10,6 +10,7 @@
 
     <?= render('global/css.php'); ?>
     <?php if (isset($css)) echo $css; ?>
+    <link rel="stylesheet" href="/css/style.css" type="text/css"/>
 </head>
 <body>
 <div class="menu">

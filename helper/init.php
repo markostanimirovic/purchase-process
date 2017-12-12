@@ -19,7 +19,7 @@ spl_autoload_register(function ($class) {
         return;
     }
 
-    $directories = ['common',  'controller', 'model', 'modelRepository', 'lib'];
+    $directories = ['common',  'controller', 'model', 'modelRepository'];
 
     foreach ($directories as $dir) {
         $filePath = ROOT . $dir . '/' . $file;

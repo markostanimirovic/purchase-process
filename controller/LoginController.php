@@ -97,6 +97,7 @@ class LoginController extends BaseController
 
     private function setUserSession(User $user)
     {
+        session_regenerate_id(true);
         $_SESSION['user']['id'] = $user->getId();
         $_SESSION['user']['username'] = $user->getUsername();
         $_SESSION['user']['role'] = $user->getRole();
@@ -104,6 +105,7 @@ class LoginController extends BaseController
 
     private function unsetUserSession()
     {
+        session_regenerate_id(true);
         session_destroy();
     }
 
