@@ -14,7 +14,7 @@ $header = ob_get_clean();
 ob_flush();
 ob_start();
 ?>
-    <div class="container col-md-6">
+    <div class="container col-md-7">
         <?php if (isset($_SESSION['message'])) {
             echo $_SESSION['message'];
             unset($_SESSION['message']);
@@ -153,7 +153,7 @@ ob_start();
                     } else {
                         <?php $dangerAlert = render('global/alert.php',
                         array('type' => 'danger', 'alertText' =>
-                            "<strong>Greška</strong> prilikom brisanja selektovanog reda! Možda zaposleni sa pozicijom koju ste želeli da obrišete.")); ?>
+                            "<strong>Greška</strong> prilikom brisanja selektovanog reda! Možda postoji zaposleni sa pozicijom koju ste želeli da obrišete.")); ?>
                         $('#alert-message').html('<?= $dangerAlert; ?>');
                     }
                 });

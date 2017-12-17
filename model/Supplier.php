@@ -165,7 +165,7 @@ class Supplier extends User
 
         if (empty($this->place)) {
             if ($_SESSION['user']['role'] === User::ADMINISTRATOR) {
-                $errors['place'][] = 'Izaberite mesto. Ako traženo ne postoji dodajte ga klikom na sledeći <a href="/place/insert/" style="color: #007bff">link</a>.';
+                $errors['place'][] = 'Izaberite mesto. Ako traženo mesto ne postoji dodajte ga klikom na sledeći <a href="/place/insert/" style="color: #007bff">link</a>.';
             } else {
                 $errors['place'][] = 'Izaberite mesto.';
             }

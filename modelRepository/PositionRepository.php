@@ -4,6 +4,7 @@ namespace modelRepository;
 
 
 use common\base\BaseModelRepository;
+use model\Employee;
 use model\Position;
 
 class PositionRepository extends BaseModelRepository
@@ -20,16 +21,15 @@ class PositionRepository extends BaseModelRepository
 
     public function isPositionSelectedInEmployee(int $positionId): bool
     {
-//        $positionTableName = Position::getTableName();
-//        $employeeTableName = Employee::getTableName();
-//        $query = "SELECT s.id FROM {$placeTableName} AS p JOIN {$supplierTableName} AS s " .
-//            "ON (p.id = s.supplier_place_id) WHERE p.id = {$placeId} AND s.deactivated = 0";
-//        $result = $this->getDb()->query($query, true);
-//        if (empty($result)) {
-//            return false;
-//        }
-// TODO: create Employee
-//        return true;
-        return false;
+        $positionTableName = Position::getTableName();
+        $employeeTableName = Employee::getTableName();
+        $query = "SELECT e.id FROM {$positionTableName} AS p JOIN {$employeeTableName} AS e " .
+            "ON (p.id = e.employee_position_id) WHERE p.id = {$positionId} AND e.deactivated = 0";
+        $result = $this->getDb()->query($query, true);
+        if (empty($result)) {
+            return false;
+        }
+
+        return true;
     }
 }
