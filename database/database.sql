@@ -101,11 +101,30 @@ CREATE TABLE `place` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `version` int(10) unsigned DEFAULT '1',
   `deactivated` tinyint(1) DEFAULT '0',
+  `zip_code` int(10) unsigned DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 /*Data for the table `place` */
+
+insert  into `place`(`id`,`version`,`deactivated`,`zip_code`,`name`) values (1,1,0,11000,'Beograd'),(2,1,0,16000,'Leskovac'),(3,1,0,37000,'Brus'),(4,1,0,34000,'Kragujevac'),(5,1,0,21000,'Novi Sad');
+
+/*Table structure for table `position` */
+
+DROP TABLE IF EXISTS `position`;
+
+CREATE TABLE `position` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `version` int(10) unsigned DEFAULT NULL,
+  `deactivated` tinyint(1) DEFAULT '0',
+  `name` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+
+/*Data for the table `position` */
+
+insert  into `position`(`id`,`version`,`deactivated`,`name`) values (1,NULL,0,'Generalni direktor'),(2,NULL,0,'Finansijski direktor'),(3,NULL,0,'Magacioner'),(4,NULL,0,'Direktor sektora nabavke'),(5,NULL,0,'Ekonomista');
 
 /*Table structure for table `product` */
 
@@ -157,23 +176,27 @@ CREATE TABLE `user` (
   `username` varchar(30) DEFAULT NULL,
   `email` varchar(50) DEFAULT NULL,
   `password` varchar(30) DEFAULT NULL,
-  `role` enum('administrator','employee','supplier') DEFAULT NULL,
+  `role` tinyint(1) unsigned DEFAULT NULL,
   `administrator_name` varchar(50) DEFAULT NULL,
+  `administrator_surname` varchar(50) DEFAULT NULL,
   `employee_name` varchar(50) DEFAULT NULL,
   `employee_surname` varchar(50) DEFAULT NULL,
-  `employee_position` varchar(50) DEFAULT NULL,
+  `employee_position_id` int(10) unsigned DEFAULT NULL,
   `supplier_name` varchar(50) DEFAULT NULL,
   `supplier_pib` varchar(9) DEFAULT NULL,
   `supplier_street` varchar(50) DEFAULT NULL,
   `supplier_street_number` varchar(10) DEFAULT NULL,
   `supplier_place_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UNIQUE_COLUMNS` (`username`,`email`),
   KEY `place_fk` (`supplier_place_id`),
-  CONSTRAINT `place_fk` FOREIGN KEY (`supplier_place_id`) REFERENCES `place` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `position_fk` (`employee_position_id`),
+  CONSTRAINT `place_fk` FOREIGN KEY (`supplier_place_id`) REFERENCES `place` (`id`),
+  CONSTRAINT `position_fk` FOREIGN KEY (`employee_position_id`) REFERENCES `position` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 /*Data for the table `user` */
+
+insert  into `user`(`id`,`version`,`deactivated`,`username`,`email`,`password`,`role`,`administrator_name`,`administrator_surname`,`employee_name`,`employee_surname`,`employee_position_id`,`supplier_name`,`supplier_pib`,`supplier_street`,`supplier_street_number`,`supplier_place_id`) values (1,1,0,'admin','admin@admin.com','admin',1,'Admin','Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
