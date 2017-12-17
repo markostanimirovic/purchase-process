@@ -9,6 +9,15 @@
         <ul class="navbar-nav mr-auto">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">Zaposleni</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                    <a class="dropdown-item" href="/employee/insert/"><i class="fa fa-plus" aria-hidden="true"></i>
+                        Unos novog</a>
+                    <a class="dropdown-item" href="/employee/"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">Dobavljač</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
                     <a class="dropdown-item" href="/supplier/insert/"><i class="fa fa-plus" aria-hidden="true"></i>
@@ -18,12 +27,22 @@
             </li>
 
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown"
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown03" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">Mesto</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
                     <a class="dropdown-item" href="/place/insert/"><i class="fa fa-plus" aria-hidden="true"></i>
                          Unos novog</a>
                     <a class="dropdown-item" href="/place/"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">Pozicija</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                    <a class="dropdown-item" href="/position/insert/"><i class="fa fa-plus" aria-hidden="true"></i>
+                        Unos nove</a>
+                    <a class="dropdown-item" href="/position/"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
                 </div>
             </li>
         </ul>

@@ -1,11 +1,11 @@
 <?php
-$title = 'Mesta';
+$title = 'Pozicije';
 
 ob_start();
 ?>
     <div class="jumbotron">
         <div class="container" style="text-align: center">
-            <h1 class="display-4"">Mesta</h1>
+            <h1 class="display-4"">Pozicije</h1>
         </div>
     </div>
 
@@ -14,7 +14,7 @@ $header = ob_get_clean();
 ob_flush();
 ob_start();
 ?>
-    <div class="container col-md-7">
+    <div class="container col-md-6">
         <?php if (isset($_SESSION['message'])) {
             echo $_SESSION['message'];
             unset($_SESSION['message']);
@@ -41,7 +41,6 @@ ob_start();
         <table id="tableData" class="table table-hover table-bordered table-striped" cellspacing="0" width="100%">
             <thead>
             <tr>
-                <th>Poštanski broj</th>
                 <th>Naziv</th>
             </tr>
             </thead>
@@ -86,14 +85,10 @@ ob_start();
             var deleteModal = $('#delete-modal');
 
             var table = $('#tableData').DataTable({
-                ajax: "/place/getAllPlaces/",
+                ajax: "/position/getAllPositions/",
                 processing: true,
                 columns: [
-                    {data: "zipCode"},
                     {data: "name"}
-                ],
-                columnDefs: [
-                    {width: "50%", targets: 0}
                 ],
                 select: {
                     style: 'single'
@@ -121,7 +116,7 @@ ob_start();
             });
 
             $('.insert').on('click', function () {
-                window.location = '/place/insert/';
+                window.location = '/position/insert/';
             });
 
             $('.edit').on('click', function () {
@@ -131,7 +126,7 @@ ob_start();
                     array('type' => 'warning', 'alertText' => "Niste izabrali red za izmenu!")); ?>
                     $('#alert-message').html('<?= $warningAlert; ?>');
                 } else {
-                    window.location = '/place/edit/' + row['id'];
+                    window.location = '/position/edit/' + row['id'];
                 }
             });
 
@@ -148,7 +143,7 @@ ob_start();
 
             $('.delete-confirmed').on('click', function () {
                 var id = table.row('.selected').data()['id'];
-                $.post('/place/deactivate/', {id: id}, function (result) {
+                $.post('/position/deactivate/', {id: id}, function (result) {
                     deleteModal.modal('hide');
                     if (result == "true") {
                         <?php $successAlert = render('global/alert.php',
@@ -158,7 +153,7 @@ ob_start();
                     } else {
                         <?php $dangerAlert = render('global/alert.php',
                         array('type' => 'danger', 'alertText' =>
-                            "<strong>Greška</strong> prilikom brisanja selektovanog reda! Možda postoji dobavljač iz mesta koje ste želeli da obrišete.")); ?>
+                            "<strong>Greška</strong> prilikom brisanja selektovanog reda! Možda zaposleni sa pozicijom koju ste želeli da obrišete.")); ?>
                         $('#alert-message').html('<?= $dangerAlert; ?>');
                     }
                 });

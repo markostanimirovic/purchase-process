@@ -41,12 +41,16 @@ body {
 }
 
 /* table selected rows */
-#places tbody tr.selected {
+#tableData tbody tr.selected {
     background-color: #007bff;
 }
 
-#places tbody tr.selected td:first-child {
+#tableData tbody tr.selected td:first-child {
     background-color: #007bff;
+}
+
+#tableData {
+    text-align: center;
 }
 
 /*.select2-container--default {*/

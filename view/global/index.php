@@ -1,11 +1,11 @@
 <?php
-$title = 'Aplikacija za proces nabavke';
+$title = 'Informacioni sistem za upravljanje procesom nabavke';
 
 ob_start();
 ?>
     <div class="jumbotron">
         <div class="container" style="text-align: center">
-            <h1 class="display-4"">Aplikacija za proces nabavke</h1>
+            <h1 class="display-4">Informacioni sistem za upravljanje procesom nabavke</h1>
         </div>
     </div>
 

@@ -5,7 +5,7 @@ ob_start()
     <div class="jumbotron">
         <div class="container" style="text-align: center">
             <h1 class="display-4"">Prijava</h1>
-            <h2 class="display-5"">Aplikacija za proces nabavke</h2>
+            <h2 class="display-5"">Informacioni sistem za upravljanje procesom nabavke</h2>
         </div>
     </div>
 

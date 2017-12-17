@@ -38,7 +38,7 @@ ob_start();
             </div>
         </div>
 
-        <table id="places" class="table table-hover table-bordered table-striped" cellspacing="0" width="100%">
+        <table id="tableData" class="table table-hover table-bordered table-striped" cellspacing="0" width="100%">
             <thead>
             <tr>
                 <th>Ime</th>
@@ -90,7 +90,7 @@ ob_start();
 
             var deleteModal = $('#delete-modal');
 
-            var table = $('#places').DataTable({
+            var table = $('#tableData').DataTable({
                 ajax: "/supplier/getAllSuppliers/",
                 processing: true,
                 columns: [

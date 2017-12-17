@@ -12,11 +12,12 @@ class PlaceController extends LoginController
     public function __construct()
     {
         $this->notLoggedIn();
-        $this->accessDeny(User::ADMINISTRATOR);
     }
 
     public function indexAction()
     {
+        $this->accessDeny(User::ADMINISTRATOR);
+
         $params = array();
         $params['menu'] = $this->render('menu/admin_menu.php');
         echo $this->render('place/index.php', $params);
@@ -24,6 +25,8 @@ class PlaceController extends LoginController
 
     public function insertAction()
     {
+        $this->accessDeny(User::ADMINISTRATOR);
+
         $params = array();
         $params['menu'] = $this->render('menu/admin_menu.php');
 
@@ -53,6 +56,8 @@ class PlaceController extends LoginController
 
     public function editAction($id)
     {
+        $this->accessDeny(User::ADMINISTRATOR);
+
         if (!ctype_digit((string)$id)) {
             header("Location: /404notFound/");
             exit();
@@ -92,6 +97,8 @@ class PlaceController extends LoginController
 
     public function deactivateAction()
     {
+        $this->accessDeny(User::ADMINISTRATOR);
+
         $id = json_decode($_POST['id']);
         if (!ctype_digit((string)$id)) {
             echo json_encode('false');

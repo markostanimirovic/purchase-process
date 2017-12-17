@@ -17,7 +17,7 @@ class IndexController extends LoginController
             $menu = $this->render('menu/admin_menu.php');
         } else if ($_SESSION['user']['role'] === User::EMPLOYEE) {
             $menu = $this->render('menu/employee_menu.php');
-        } else {
+        } else if ($_SESSION['user']['role'] === User::SUPPLIER) {
             $menu = $this->render('menu/supplier_menu.php');
         }
 

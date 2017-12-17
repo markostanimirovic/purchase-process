@@ -41,10 +41,10 @@ ob_start();
                     <div class="form-group col-md-6">
                         <label for="surname" class="col-form-label">Prezime <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="surname" placeholder="Prezime" name="surname"
-                               value="<?= $administrator->getName(); ?>">
+                               value="<?= $administrator->getSurname(); ?>">
                         <?php
-                        if (isset($errors['name'])) {
-                            foreach ($errors['name'] as $error) {
+                        if (isset($errors['surname'])) {
+                            foreach ($errors['surname'] as $error) {
                                 ?>
                                 <span class="text-danger"><?php echo $error; ?></span>
                                 <?php
@@ -57,7 +57,7 @@ ob_start();
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="username" class="col-form-label">Korisničko ime <span
-                                class="text-danger">*</span></label>
+                                    class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="username" placeholder="Korisničko ime"
                                name="username" value="<?= $administrator->getUsername(); ?>">
                         <?php
@@ -88,8 +88,11 @@ ob_start();
                 <div class="form-row">
                     <div class="form-group col-md-4">
                         <label for="old-password" class="col-form-label">Stara lozinka</label>
-                        <input type="password" class="form-control" id="old-password" placeholder="Stara lozinka" name="old-password"
-                               value="">
+                        <input type="password" class="form-control" id="old-password" placeholder="Stara lozinka"
+                               name="old-password"
+                               value="<?php if (!is_null($administrator->getOldPassword())) {
+                                   echo $administrator->getOldPassword();
+                               } ?>">
                         <?php
                         if (isset($errors['oldPassword'])) {
                             foreach ($errors['oldPassword'] as $error) {
@@ -102,8 +105,11 @@ ob_start();
                     </div>
                     <div class="form-group col-md-4">
                         <label for="new-password" class="col-form-label">Nova lozinka</label>
-                        <input type="password" class="form-control" id="new-password" placeholder="Nova lozinka" name="new-password"
-                               value="">
+                        <input type="password" class="form-control" id="new-password" placeholder="Nova lozinka"
+                               name="new-password"
+                               value="<?php if (!is_null($administrator->getNewPassword())) {
+                                   echo $administrator->getNewPassword();
+                               } ?>">
                         <?php
                         if (isset($errors['newPassword'])) {
                             foreach ($errors['newPassword'] as $error) {
@@ -116,8 +122,11 @@ ob_start();
                     </div>
                     <div class="form-group col-md-4">
                         <label for="new-repeated-password" class="col-form-label">Ponovite lozinku</label>
-                        <input type="password" class="form-control" id="new-repeated-password" placeholder="Ponovite lozinku" name="new-repeated-password"
-                               value="">
+                        <input type="password" class="form-control" id="new-repeated-password"
+                               placeholder="Ponovite lozinku" name="new-repeated-password"
+                               value="<?php if (!is_null($administrator->getNewRepeatedPassword())) {
+                                   echo $administrator->getNewRepeatedPassword();
+                               } ?>">
                         <?php
                         if (isset($errors['newRepeatedPassword'])) {
                             foreach ($errors['newRepeatedPassword'] as $error) {

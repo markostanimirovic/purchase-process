@@ -17,7 +17,9 @@ class User extends BaseModel
     protected $username;
     protected $email;
     protected $password;
-    protected $repeatedPassword;
+    protected $oldPassword;
+    protected $newPassword;
+    protected $newRepeatedPassword;
     protected $role;
 
     public function __construct()
@@ -55,14 +57,34 @@ class User extends BaseModel
         $this->password = $password;
     }
 
-    public function getRepeatedPassword()
+    public function getOldPassword()
     {
-        return $this->repeatedPassword;
+        return $this->oldPassword;
     }
 
-    public function setRepeatedPassword(string $repeatedPassword)
+    public function setOldPassword(string $oldPassword)
     {
-        $this->repeatedPassword = $repeatedPassword;
+        $this->oldPassword = $oldPassword;
+    }
+
+    public function getNewPassword()
+    {
+        return $this->newPassword;
+    }
+
+    public function setNewPassword(string $newPassword)
+    {
+        $this->newPassword = $newPassword;
+    }
+
+    public function getNewRepeatedPassword()
+    {
+        return $this->newRepeatedPassword;
+    }
+
+    public function setNewRepeatedPassword(string $newRepeatedPassword)
+    {
+        $this->newRepeatedPassword = $newRepeatedPassword;
     }
 
     public function getRole()
@@ -148,17 +170,29 @@ class User extends BaseModel
             $errors['email'][] = 'Korisnik sa unetim e-mail-om već postoji.';
         }
 
-//        if ($this->getStatus() !== BaseModel::STATUS_INSERT) {
-//            if (strlen($this->password) === 0) {
-//                $errors['password'][] = 'Lozinka ne sme da bude prazno polje.';
-//            } else if (strlen($this->password) > 30) {
-//                $errors['password'][] = 'Maksimalan broj karaktera za lozinku je 30.';
-//            }
-//
-//            if ($this->password !== $this->repeatedPassword) {
-//                $errors['repeatedPassword'][] = 'Lozinka i ponovljena lozinka se ne poklapaju.';
-//            }
-//        }
+        if (strlen($this->oldPassword) !== 0 || strlen($this->newPassword) !== 0 || strlen($this->newRepeatedPassword) !== 0) {
+            if (strlen($this->newPassword) === 0) {
+                $errors['newPassword'][] = 'Nova lozinka ne sme da bude prazno polje.';
+            } else if (strlen($this->newPassword) > 30) {
+                $errors['newPassword'][] = 'Maksimalan broj karaktera za lozinku je 30.';
+            }
+
+            if (strlen($this->newPassword) > 0 && strlen($this->newRepeatedPassword) === 0) {
+                $errors['newRepeatedPassword'][] = 'Ponovite novu lozinku.';
+            } else if ($this->newPassword !== $this->newRepeatedPassword) {
+                $errors['newRepeatedPassword'][] = 'Nova lozinka i ponovljena lozinka se ne poklapaju.';
+            }
+
+            if (strlen($this->oldPassword) === 0) {
+                $errors['oldPassword'][] = 'Unesite staru lozinku.';
+            } else if ($this->oldPassword !== $this->password) {
+                $errors['oldPassword'][] = 'Pogrešna stara lozinka.';
+            }
+
+            if (empty($errors)) {
+                $this->password = $this->newPassword;
+            }
+        }
 
         return $errors;
     }
@@ -167,7 +201,7 @@ class User extends BaseModel
     {
         $userRepository = new UserRepository();
         $usernameColumnName = '`username`';
-        $duplicateUser = $userRepository->loadOne(true, $usernameColumnName . ' = "' . $this->username . '"');
+        $duplicateUser = $userRepository->loadOne(true, $usernameColumnName . ' = ' . $this->getDb()->quote($this->username));
 
         if (empty($duplicateUser)) {
             return false;
