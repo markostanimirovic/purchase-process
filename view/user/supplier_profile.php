@@ -86,7 +86,7 @@ ob_start();
                     </div>
                     <div class="form-group col-md-4">
                         <label for="place" class="col-form-label">Mesto <span class="text-danger">*</span></label>
-                        <select id="place" class="form-control" id="place" name="place">
+                        <select id="place" class="form-control" name="place">
                             <?php if (!empty($supplier) && !empty($supplier->getPlace())) { ?>
                                 <option value="<?= $supplier->getPlace()->getId(); ?>">
                                     <?= $supplier->getPlace()->getZipCode() . ' ' . $supplier->getPlace()->getName(); ?>

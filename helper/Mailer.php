@@ -9,11 +9,10 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class Mailer
 {
-//\helper\Mailer::sendMail('markostanimirovic95@gmail.com', 'Konfiguracioni mejl', '<table border="1"><tr><td>Korisnicko ime</td><td>Marko</td></tr><tr><td>Lozinka</td><td>Marko.123</td></tr></table>');
 
     public static function sendMail(string $address, string $subject, string $body): bool
     {
-        $mailConfiguration = require ROOT . 'config/mail_config.php';
+        $mailConfiguration = require(ROOT . 'config/mail_config.php');
 
         $phpMailer = new PHPMailer();
         $phpMailer->isSMTP();
@@ -31,9 +30,13 @@ class Mailer
         $phpMailer->isHTML(true);
         $phpMailer->Body = $body;
 
-        if ($phpMailer->send()) {
-            return true;
+        try {
+            if ($phpMailer->send()) {
+                return true;
+            }
+            return false;
+        } catch (\Exception $exception) {
+            return false;
         }
-        return false;
     }
 }

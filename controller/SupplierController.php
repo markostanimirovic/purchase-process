@@ -15,7 +15,7 @@ class SupplierController extends LoginController
     public function __construct()
     {
         $this->notLoggedIn();
-        $this->accessDeny(User::ADMINISTRATOR);
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
     }
 
     public function indexAction()
@@ -35,7 +35,7 @@ class SupplierController extends LoginController
 
             $supplier->setUsername($_POST['username']);
             $supplier->setEmail($_POST['email']);
-            $supplier->setPassword(Generator::getRandomPassword());
+            $supplier->setPassword(Generator::getRandomString());
             $supplier->setRole(User::SUPPLIER);
 
             $supplier->setName($_POST['name']);
@@ -100,7 +100,7 @@ class SupplierController extends LoginController
             $resetPassword = (isset($_POST['reset-password'])) ? $_POST['reset-password'] : null;
             $params['resetPassword'] = $resetPassword;
             if (isset($resetPassword)) {
-                $supplier->setPassword(Generator::getRandomPassword());
+                $supplier->setPassword(Generator::getRandomString());
             }
 
             $supplier->setName($_POST['name']);
@@ -180,6 +180,6 @@ class SupplierController extends LoginController
         }
 
         $j['data'] = $jsonArray;
-        echo json_encode($j);
+        echo json_encode($j, JSON_UNESCAPED_UNICODE);
     }
 }

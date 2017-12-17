@@ -32,4 +32,12 @@ class PositionRepository extends BaseModelRepository
 
         return true;
     }
+
+    public function loadByFilter(string $filter): array
+    {
+        $filter = $this->getDb()->quote("%$filter%");
+        $whereCondition = "`name` LIKE {$filter}";
+        $positions = $this->load(true, $whereCondition);
+        return $positions;
+    }
 }

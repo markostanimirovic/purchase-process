@@ -5,7 +5,9 @@ namespace controller;
 
 use model\User;
 use modelRepository\AdministratorRepository;
+use modelRepository\EmployeeRepository;
 use modelRepository\PlaceRepository;
+use modelRepository\PositionRepository;
 use modelRepository\SupplierRepository;
 
 class UserController extends LoginController
@@ -64,9 +66,41 @@ class UserController extends LoginController
 
     private function employeeProfile()
     {
-        $menu = $this->render('menu/employee_menu.php');
+        $params = array();
 
-        echo $this->render('user/employee_profile.php', array('menu' => $menu));
+        $params['menu'] = $this->render('menu/employee_menu.php');
+
+        $employeeRepository = new EmployeeRepository();
+        $employee = $employeeRepository->loadById($_SESSION['user']['id']);
+
+        $params['employee'] = $employee;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $employee->setName($_POST['name']);
+            $employee->setSurname($_POST['surname']);
+
+            $positionId = (!isset($_POST['position']) || !ctype_digit((string)$_POST['position'])) ? -1 : $_POST['position'];
+            $positionRepository = new PositionRepository();
+            $position = $positionRepository->loadById($positionId);
+            $employee->setPosition($position);
+
+            $employee->setOldPassword($_POST['old-password']);
+            $employee->setNewPassword($_POST['new-password']);
+            $employee->setNewRepeatedPassword($_POST['new-repeated-password']);
+            $result = $employee->save();
+            if (!empty($result)) {
+                $params['errors'] = $result;
+                $_SESSION['message'] = $this->render('global/alert.php',
+                    array('type' => 'danger', 'alertText' => '<strong>Greška</strong> prilikom izmene profila!'));
+            } else {
+                $_SESSION['message'] = $this->render('global/alert.php',
+                    array('type' => 'success', 'alertText' => "<strong>Uspešno</strong> ste izmenili profil!"));
+                header('Location: /');
+                exit();
+            }
+        }
+
+        echo $this->render('user/employee_profile.php', $params);
     }
 
     private function supplierProfile()

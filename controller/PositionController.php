@@ -16,7 +16,7 @@ class PositionController extends LoginController
 
     public function indexAction()
     {
-        $this->accessDeny(User::ADMINISTRATOR);
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
 
         $params = array();
         $params['menu'] = $this->render('menu/admin_menu.php');
@@ -25,7 +25,7 @@ class PositionController extends LoginController
 
     public function insertAction()
     {
-        $this->accessDeny(User::ADMINISTRATOR);
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
 
         $params = array();
         $params['menu'] = $this->render('menu/admin_menu.php');
@@ -53,7 +53,7 @@ class PositionController extends LoginController
 
     public function editAction($id)
     {
-        $this->accessDeny(User::ADMINISTRATOR);
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
 
         if (!ctype_digit((string)$id)) {
             header("Location: /404notFound/");
@@ -93,7 +93,7 @@ class PositionController extends LoginController
 
     public function deactivateAction()
     {
-        $this->accessDeny(User::ADMINISTRATOR);
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
 
         $id = json_decode($_POST['id']);
         if (!ctype_digit((string)$id)) {
@@ -120,6 +120,8 @@ class PositionController extends LoginController
 
     public function getAllPositionsAction()
     {
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
+
         header('Content-type: application/json');
 
         $jsonArray = array();
@@ -132,11 +134,27 @@ class PositionController extends LoginController
             $jsonArray[] = $json;
         }
         $j['data'] = $jsonArray;
-        echo json_encode($j);
+        echo json_encode($j, JSON_UNESCAPED_UNICODE);
     }
 
     public function getAllPositionsByFilterAction()
     {
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR, User::EMPLOYEE]);
 
+        header('Content-type: application/json');
+
+        $filter = (!isset($_GET['filter'])) ? '' : trim($_GET['filter']);
+        $positionRepository = new PositionRepository();
+        $positions = $positionRepository->loadByFilter($filter);
+        if (empty($positions)) {
+            $response = array('results' => array());
+        } else {
+            $data = array();
+            foreach ($positions as $position) {
+                $data[] = array('id' => $position->getId(), 'text' => $position->getName());
+            }
+            $response = array('results' => $data);
+        }
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
     }
 }

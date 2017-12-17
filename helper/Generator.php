@@ -5,7 +5,7 @@ namespace helper;
 
 class Generator
 {
-    public static function getRandomPassword(): string
+    public static function getRandomString(): string
     {
         $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
         $pass = array();

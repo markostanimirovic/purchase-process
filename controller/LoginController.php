@@ -73,23 +73,42 @@ class LoginController extends BaseController
         header("Location: /login/");
     }
 
-    protected function accessDeny($role)
+//    protected function accessDeny($role)
+//    {
+//        if ($_SESSION['user']['role'] !== $role) {
+//            header('Location: /404NotFound/');
+//        }
+//    }
+
+    protected function accessDenyIfNotIn(array $roles = array())
     {
-        if($_SESSION['user']['role'] !== $role) {
+        $not = false;
+        $length = sizeOf($roles);
+
+        for ($i = 0; $i < $length; $i++) {
+            if ($_SESSION['user']['role'] === $roles[$i]) {
+                $not = false;
+                break;
+            } else {
+                $not = true;
+            }
+        }
+
+        if ($not) {
             header('Location: /404NotFound/');
         }
     }
 
     private function loggedIn()
     {
-        if(isset($_SESSION['user'])) {
+        if (isset($_SESSION['user'])) {
             header('Location: /');
         }
     }
 
     protected function notLoggedIn()
     {
-        if(!isset($_SESSION['user'])) {
+        if (!isset($_SESSION['user'])) {
             header('Location: /login/');
             exit();
         }

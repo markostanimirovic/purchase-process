@@ -16,7 +16,7 @@ class PlaceController extends LoginController
 
     public function indexAction()
     {
-        $this->accessDeny(User::ADMINISTRATOR);
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
 
         $params = array();
         $params['menu'] = $this->render('menu/admin_menu.php');
@@ -25,7 +25,7 @@ class PlaceController extends LoginController
 
     public function insertAction()
     {
-        $this->accessDeny(User::ADMINISTRATOR);
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
 
         $params = array();
         $params['menu'] = $this->render('menu/admin_menu.php');
@@ -56,7 +56,7 @@ class PlaceController extends LoginController
 
     public function editAction($id)
     {
-        $this->accessDeny(User::ADMINISTRATOR);
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
 
         if (!ctype_digit((string)$id)) {
             header("Location: /404notFound/");
@@ -97,7 +97,7 @@ class PlaceController extends LoginController
 
     public function deactivateAction()
     {
-        $this->accessDeny(User::ADMINISTRATOR);
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
 
         $id = json_decode($_POST['id']);
         if (!ctype_digit((string)$id)) {
@@ -124,6 +124,8 @@ class PlaceController extends LoginController
 
     public function getAllPlacesAction()
     {
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
+
         header('Content-type: application/json');
 
         $jsonArray = array();
@@ -137,19 +139,22 @@ class PlaceController extends LoginController
             $jsonArray[] = $json;
         }
         $j['data'] = $jsonArray;
-        echo json_encode($j);
+        echo json_encode($j, JSON_UNESCAPED_UNICODE);
     }
 
     public function getAllPlacesByFilterAction()
     {
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR, User::SUPPLIER]);
+
         header('Content-type: application/json');
 
-        $filter = trim($_GET['filter']);
+        $filter = (!isset($_GET['filter'])) ? '' : trim($_GET['filter']);
         $placeRepository = new PlaceRepository();
         $places = $placeRepository->loadByFilter($filter);
         if (empty($places)) {
             $response = array('results' => array());
         } else {
+            $data = array();
             foreach ($places as $place) {
                 $data[] = array('id' => $place->getId(), 'text' => $place->getZipCode() . ' ' . $place->getName());
             }
