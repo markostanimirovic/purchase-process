@@ -10,6 +10,11 @@ class Position extends BaseModel
 {
     protected $name;
 
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
     public function getName()
     {
         return $this->name;
