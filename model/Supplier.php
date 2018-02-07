@@ -14,6 +14,7 @@ class Supplier extends User
     protected $street;
     protected $streetNumber;
     protected $place;
+    protected $apiUrl;
 
     public function __construct()
     {
@@ -70,6 +71,16 @@ class Supplier extends User
         $this->place = $place;
     }
 
+    public function getApiUrl()
+    {
+        return $this->apiUrl;
+    }
+
+    public function setApiUrl($apiUrl)
+    {
+        $this->apiUrl = $apiUrl;
+    }
+
     public function populate(array $dbRow): BaseModel
     {
         $this->setName($dbRow['supplier_name']);
@@ -77,6 +88,7 @@ class Supplier extends User
         $this->setStreet($dbRow['supplier_street']);
         $this->setStreetNumber($dbRow['supplier_street_number']);
         $this->setPlace((new PlaceRepository())->loadById($dbRow['supplier_place_id']));
+        $this->setApiUrl($dbRow['supplier_api_url']);
         return parent::populate($dbRow);
     }
 
@@ -113,6 +125,12 @@ class Supplier extends User
                     'columnType' => \PDO::PARAM_INT,
                     'columnSize' => 10,
                     'columnValue' => $this->getPlace()->getId()
+                ),
+                'apiUrl' => array(
+                    'columnName' => '`supplier_api_url`',
+                    'columnType' => \PDO::PARAM_STR,
+                    'columnSize' => 100,
+                    'columnValue' => $this->getApiUrl()
                 )
             ),
             parent::getFieldMapping()
@@ -132,6 +150,7 @@ class Supplier extends User
         $this->pib = trim($this->pib);
         $this->street = trim($this->street);
         $this->streetNumber = trim($this->streetNumber);
+        $this->apiUrl = trim($this->apiUrl);
 
         if (strlen($this->name) === 0) {
             $errors['name'][] = 'Ime ne sme da bude prazno polje.';
@@ -169,6 +188,14 @@ class Supplier extends User
             } else {
                 $errors['place'][] = 'Izaberite mesto.';
             }
+        }
+
+        if (strlen($this->apiUrl) === 0) {
+            $errors['apiUrl'][] = 'URL ne sme da bude prazno polje.';
+        } else if (strlen($this->apiUrl) > 100) {
+            $errors['apiUrl'][] = 'Maksimalan broj karaktera za URL je 100.';
+        } else if (!filter_var($this->apiUrl, FILTER_VALIDATE_URL)) {
+            $errors['apiUrl'][] = 'URL mora biti u formatu http://example.example.com/example';
         }
 
         return array_merge($errors, parent::validate());

@@ -1,6 +1,6 @@
 <?php
 return array(
-    'name' => 'Aplikacija za proces nabavke',
+    'name' => 'Informacioni sistem za upravljanje procesom nabavke',
     'host' => 'smtp.gmail.com',
     'username' => 'purchase.process.app@gmail.com',
     'password' => 'marko.stanimirovic',

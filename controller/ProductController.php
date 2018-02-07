@@ -3,25 +3,32 @@
 namespace controller;
 
 
-class ProductController
+use adapter\ProductAdapter;
+use model\User;
+
+class ProductController extends LoginController
 {
+    public function __construct()
+    {
+        $this->notLoggedIn();
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+    }
+
     public function indexAction()
     {
-        echo 'Proizvod';
+        $params = array();
+        $params['menu'] = $this->render('menu/supplier_menu.php');
+        echo $this->render('product/index.php', $params);
     }
 
-    public function insertAction()
+    public function getAllProductsAction()
     {
+        header('Content-type: application/json');
 
-    }
+        $products = array();
+        $adapter = new ProductAdapter();
+        $products['data'] = $adapter->getAll(true);
 
-    public function editAction()
-    {
-
-    }
-
-    public function deleteAction()
-    {
-
+        echo json_encode($products);
     }
 }

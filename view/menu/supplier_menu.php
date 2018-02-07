@@ -21,9 +21,7 @@
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">Proizvod</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
-                    <a class="dropdown-item" href="#"><i class="fa fa-plus" aria-hidden="true"></i>
-                        Unos novog</a>
-                    <a class="dropdown-item" href="#"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
+                    <a class="dropdown-item" href="/product/"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
                 </div>
             </li>
 

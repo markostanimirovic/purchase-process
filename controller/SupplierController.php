@@ -42,6 +42,7 @@ class SupplierController extends LoginController
             $supplier->setPib($_POST['pib']);
             $supplier->setStreet($_POST['street']);
             $supplier->setStreetNumber($_POST['street-number']);
+            $supplier->setApiUrl($_POST['api-url']);
 
             $placeId = (!isset($_POST['place']) || !ctype_digit((string)$_POST['place'])) ? -1 : $_POST['place'];
             $placeRepository = new PlaceRepository();
@@ -107,6 +108,7 @@ class SupplierController extends LoginController
             $supplier->setPib($_POST['pib']);
             $supplier->setStreet($_POST['street']);
             $supplier->setStreetNumber($_POST['street-number']);
+            $supplier->setApiUrl($_POST['api-url']);
 
             $placeId = (!isset($_POST['place']) || !ctype_digit((string)$_POST['place'])) ? -1 : $_POST['place'];
             $placeRepository = new PlaceRepository();

@@ -4,17 +4,27 @@ namespace model;
 
 
 use common\base\BaseModel;
-use common\DBBroker;
 
 class Product extends BaseModel
 {
-    private $name;
-    private $price;
-    private $unit;
+    protected $code;
+    protected $name;
+    protected $unit;
+    protected $price;
 
     public function __construct()
     {
         parent::__construct();
+    }
+
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    public function setCode($code)
+    {
+        $this->code = $code;
     }
 
     public function getName()
@@ -22,19 +32,9 @@ class Product extends BaseModel
         return $this->name;
     }
 
-    public function setName(string $name)
+    public function setName($name)
     {
         $this->name = $name;
-    }
-
-    public function getPrice()
-    {
-        return $this->price;
-    }
-
-    public function setPrice(float $price)
-    {
-        $this->price = $price;
     }
 
     public function getUnit()
@@ -42,9 +42,19 @@ class Product extends BaseModel
         return $this->unit;
     }
 
-    public function setUnit(string $unit)
+    public function setUnit($unit)
     {
         $this->unit = $unit;
+    }
+
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    public function setPrice($price)
+    {
+        $this->price = $price;
     }
 
     public function populate(array $dbRow): BaseModel
@@ -59,23 +69,29 @@ class Product extends BaseModel
     {
         return array_merge_recursive(
             array(
+                'code' => array(
+                    'columnName' => '`code`',
+                    'columnType' => \PDO::PARAM_STR,
+                    'columnSize' => 10,
+                    'columnValue' => $this->getCode()
+                ),
                 'name' => array(
-                    'columnName' => 'name',
+                    'columnName' => '`name`',
                     'columnType' => \PDO::PARAM_STR,
                     'columnSize' => 50,
                     'columnValue' => $this->getName()
                 ),
+                'unit' => array(
+                    'columnName' => '`unit`',
+                    'columnType' => \PDO::PARAM_STR,
+                    'columnSize' => 50,
+                    'columnValue' => $this->getUnit()
+                ),
                 'price' => array(
-                    'columnName' => 'price',
+                    'columnName' => '`price`',
                     'columnType' => \PDO::PARAM_STR,
                     'columnSize' => 12,
                     'columnValue' => $this->getPrice()
-                ),
-                'unit' => array(
-                    'columnName' => 'unit',
-                    'columnType' => \PDO::PARAM_STR,
-                    'columnSize' => 20,
-                    'columnValue' => $this->getUnit()
                 )
             ),
             parent::getFieldMapping()
@@ -84,7 +100,7 @@ class Product extends BaseModel
 
     public static function getTableName(): string
     {
-        return 'product';
+        return '`product`';
     }
 
     protected function validate(): array

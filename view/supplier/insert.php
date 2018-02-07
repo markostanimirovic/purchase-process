@@ -104,6 +104,28 @@ ob_start();
                         ?>
                     </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label for="api-url" class="col-form-label">URL Web servisa gde su izloženi proizvodi dobavljača
+                            <span class="text-danger">*</span>
+                        </label>
+                        <label class="col-form-label text-primary">
+                            Napomena: Servis mora da vraća odgovor u JSON formatu.
+                        </label>
+                        <input type="text" class="form-control" id="api-url" placeholder="URL"
+                               name="api-url"
+                               value="<?php if (isset($supplier)) echo $supplier->getApiUrl(); ?>">
+                        <?php
+                        if (isset($errors['apiUrl'])) {
+                            foreach ($errors['apiUrl'] as $error) {
+                                ?>
+                                <span class="text-danger"><?php echo $error; ?></span>
+                                <?php
+                            }
+                        }
+                        ?>
+                    </div>
+                </div>
                 <hr>
                 <div class="form-row">
                     <div class="form-group col-md-6">

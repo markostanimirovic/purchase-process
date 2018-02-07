@@ -125,6 +125,8 @@ class UserController extends LoginController
             $place = $placeRepository->loadById($placeId);
             $supplier->setPlace($place);
 
+            $supplier->setApiUrl($_POST['api-url']);
+
             $supplier->setOldPassword($_POST['old-password']);
             $supplier->setNewPassword($_POST['new-password']);
             $supplier->setNewRepeatedPassword($_POST['new-repeated-password']);
