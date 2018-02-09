@@ -9,7 +9,6 @@ use modelRepository\SupplierRepository;
 
 class ProductAdapter extends BaseAdapter
 {
-    protected $supplier;
 
     protected function getApiUrl(): string
     {
@@ -54,6 +53,26 @@ class ProductAdapter extends BaseAdapter
         $product->setName($assoc['name']);
         $product->setUnit($assoc['unit']);
         $product->setPrice($assoc['price']);
+
+        return $product;
+    }
+
+    public function getByCode($code, $assoc = false)
+    {
+        try {
+            $response = $this->client->request('GET', $this->url . '?code=' . $code);
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        $productAssoc = json_decode($response->getBody()->getContents(), true);
+
+        if ($assoc) {
+            unset($productAssoc['id']);
+            return $productAssoc;
+        }
+
+        $product = $this->convertProductAssocToClass($productAssoc);
 
         return $product;
     }

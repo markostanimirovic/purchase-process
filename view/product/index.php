@@ -15,11 +15,9 @@ ob_flush();
 ob_start();
 ?>
     <div class="container col-md-9">
-        <div class="vrednost"></div>
-
         <div align="center" style="padding-bottom: 10px">
             <label for="currency">Cena je u valuti:</label>
-            <select class="form-control col-md-1 col-md-offset-5" id="currency">
+            <select class="form-control form-control-sm col-md-1 col-md-offset-5" id="currency">
                 <option value="rsd" selected>RSD</option>
                 <option value="eur">EUR</option>
                 <option value="chf">CHF</option>
@@ -90,7 +88,8 @@ ob_start();
                 present = this.value;
                 $.ajax({
                     url: "https://api.kursna-lista.info/f53ec1381124cf3ac11a0ac413c7ee76/konvertor/" + previous + "/" + present + "/1",
-                    type: "GET"
+                    type: "GET",
+                    dataType: 'jsonp'
                 }).then(function (data) {
                     table.rows().every(function (rowId) {
                         table.cell(rowId, 3).data((table.cell(rowId, 3).data() * data.result.value).toFixed(2));

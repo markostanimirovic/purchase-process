@@ -29,6 +29,18 @@ class ProductController extends LoginController
         $adapter = new ProductAdapter();
         $products['data'] = $adapter->getAll(true);
 
-        echo json_encode($products);
+        echo json_encode($products, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function getProductByCodeAction($code)
+    {
+        $code = urldecode($code);
+
+        header('Content-type: application/json');
+
+        $adapter = new ProductAdapter();
+        $product = $adapter->getByCode($code, true);
+
+        echo json_encode($product, JSON_UNESCAPED_UNICODE);
     }
 }

@@ -4,15 +4,15 @@ namespace model;
 
 
 use common\base\BaseModel;
-use modelRepository\CatalogRepository;
+use modelRepository\SupplierRepository;
 
-class Product extends BaseModel
+class Catalog extends BaseModel
 {
     protected $code;
     protected $name;
-    protected $unit;
-    protected $price;
-    protected $catalog;
+    protected $date;
+    protected $products;
+    protected $supplier;
 
     public function __construct()
     {
@@ -39,43 +39,32 @@ class Product extends BaseModel
         $this->name = $name;
     }
 
-    public function getUnit()
+    public function getDate()
     {
-        return $this->unit;
+        return $this->date;
     }
 
-    public function setUnit($unit)
+    public function setDate($date)
     {
-        $this->unit = $unit;
+        $this->date = $date;
     }
 
-    public function getPrice()
+    public function getSupplier()
     {
-        return $this->price;
+        return $this->supplier;
     }
 
-    public function setPrice($price)
+    public function setSupplier($supplier)
     {
-        $this->price = $price;
-    }
-
-    public function getCatalog()
-    {
-        return $this->catalog;
-    }
-
-    public function setCatalog($catalog)
-    {
-        $this->catalog = $catalog;
+        $this->supplier = $supplier;
     }
 
     public function populate(array $dbRow): BaseModel
     {
-        $this->setCode($dbRow['code']);
+        $this->setCode(floatval($dbRow['code']));
         $this->setName($dbRow['name']);
-        $this->setPrice(floatval($dbRow['price']));
-        $this->setUnit($dbRow['unit']);
-        $this->setCatalog((new CatalogRepository())->loadById($dbRow['catalog_id']));
+        $this->setDate($dbRow['date']);
+        $this->setSupplier((new SupplierRepository())->loadById($dbRow['supplier_id']));
         return parent::populate($dbRow);
     }
 
@@ -92,20 +81,20 @@ class Product extends BaseModel
                 'name' => array(
                     'columnName' => '`name`',
                     'columnType' => \PDO::PARAM_STR,
-                    'columnSize' => 100,
+                    'columnSize' => 50,
                     'columnValue' => $this->getName()
                 ),
-                'unit' => array(
-                    'columnName' => '`unit`',
+                'date' => array(
+                    'columnName' => '`date`',
                     'columnType' => \PDO::PARAM_STR,
-                    'columnSize' => 50,
-                    'columnValue' => $this->getUnit()
+                    'columnSize' => 10,
+                    'columnValue' => $this->getDate()
                 ),
-                'price' => array(
-                    'columnName' => '`price`',
-                    'columnType' => \PDO::PARAM_STR,
-                    'columnSize' => 12,
-                    'columnValue' => $this->getPrice()
+                'supplier' => array(
+                    'columnName' => '`supplier_id`',
+                    'columnType' => \PDO::PARAM_INT,
+                    'columnSize' => 10,
+                    'columnValue' => $this->getSupplier()->getId()
                 )
             ),
             parent::getFieldMapping()
@@ -114,11 +103,19 @@ class Product extends BaseModel
 
     public static function getTableName(): string
     {
-        return '`product`';
+        return '`catalog`';
     }
 
     protected function validate(): array
     {
-        return [];
+        $errors = array();
+
+        $this->code = trim($this->code);
+        $this->name = trim($this->name);
+        $this->date = trim($this->date);
+
+        //TODO: implement
+
+        return $errors;
     }
 }

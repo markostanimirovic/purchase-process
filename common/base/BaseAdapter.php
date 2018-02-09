@@ -12,8 +12,8 @@ abstract class BaseAdapter
     public function __construct()
     {
         require ROOT . 'lib/vendor/autoload.php';
-        $this->url = $this->getApiUrl();
         $this->client = new Client();
+        $this->url = $this->getApiUrl();
     }
 
     protected abstract function getApiUrl(): string;
