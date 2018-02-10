@@ -7,7 +7,7 @@ $(document).ready(function () {
         onSelect: function () {
             $('#date-error').text('');
         },
-        altFormat: "dd-mm-yyyy",
+        dateFormat: "dd/mm/yy",
         firstDay: 1,
         dayNamesMin: ["Ned", "Pon", "Uto", "Sre", "Čet", "Pet", "Sub"],
         monthNames: ["Januar", "Februar", "Mart", "April", "Maj", "Jun", "Jul", "Avgust", "Septembar", "Oktobar", "Novembar", "Decembar"]
@@ -108,16 +108,14 @@ $(document).ready(function () {
         if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate() | !isNameValidate($('#name').val())) {
             return;
         }
-
-        sendDataToTheServer('save');
+        sendDataToTheServer('insertDraft');
     });
 
     $('.send').on('click', function () {
         if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate() | !isNameValidate($('#name').val())) {
             return;
         }
-
-        sendDataToTheServer('send');
+        sendDataToTheServer('insertSent');
     });
 
     function sendDataToTheServer(method) {
@@ -131,8 +129,22 @@ $(document).ready(function () {
                 }
             }, function (data) {
                 var response = JSON.parse(data);
-                console.log(response.message);
+                if (response.type == 'success') {
+                    window.location = '/catalog/';
+                } else {
+                    echoErrorMessages(response.messages);
+                }
             });
+    }
+
+    function echoErrorMessages(messages) {
+        $('.error-messages').text('');
+        $.each(messages, function (i, value) {
+            $('.error-messages')
+                .append('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span></button>' + value + '</div>');
+        });
     }
 
     function getArrayOfCodes() {

@@ -45,18 +45,6 @@ class ProductAdapter extends BaseAdapter
         return $products;
     }
 
-    private function convertProductAssocToClass(array $assoc): Product
-    {
-        $product = new Product();
-
-        $product->setCode($assoc['code']);
-        $product->setName($assoc['name']);
-        $product->setUnit($assoc['unit']);
-        $product->setPrice($assoc['price']);
-
-        return $product;
-    }
-
     public function getByCode($code, $assoc = false)
     {
         try {
@@ -73,6 +61,18 @@ class ProductAdapter extends BaseAdapter
         }
 
         $product = $this->convertProductAssocToClass($productAssoc);
+
+        return $product;
+    }
+
+    private function convertProductAssocToClass(array $assoc): Product
+    {
+        $product = new Product();
+
+        $product->setCode($assoc['code']);
+        $product->setName($assoc['name']);
+        $product->setUnit($assoc['unit']);
+        $product->setPrice($assoc['price']);
 
         return $product;
     }

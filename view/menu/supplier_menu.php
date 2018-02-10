@@ -13,7 +13,7 @@
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
                     <a class="dropdown-item" href="/catalog/insert/"><i class="fa fa-plus" aria-hidden="true"></i>
                         Unos novog</a>
-                    <a class="dropdown-item" href="#"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
+                    <a class="dropdown-item" href="/catalog/"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
                 </div>
             </li>
 

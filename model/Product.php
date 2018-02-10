@@ -106,6 +106,12 @@ class Product extends BaseModel
                     'columnType' => \PDO::PARAM_STR,
                     'columnSize' => 12,
                     'columnValue' => $this->getPrice()
+                ),
+                'catalog' => array(
+                    'columnName' => '`catalog_id`',
+                    'columnType' => \PDO::PARAM_INT,
+                    'columnSize' => 10,
+                    'columnValue' => $this->getCatalog()->getId()
                 )
             ),
             parent::getFieldMapping()

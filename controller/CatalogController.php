@@ -4,7 +4,9 @@ namespace controller;
 
 
 use adapter\ProductAdapter;
+use model\Catalog;
 use model\User;
+use modelRepository\SupplierRepository;
 
 class CatalogController extends LoginController
 {
@@ -12,6 +14,14 @@ class CatalogController extends LoginController
     {
         $this->notLoggedIn();
         $this->accessDenyIfNotIn([User::SUPPLIER]);
+    }
+
+    public function indexAction()
+    {
+        $params = array();
+        $params['menu'] = $this->render('menu/supplier_menu.php');
+
+        echo $this->render('catalog/index.php', $params);
     }
 
     public function insertAction()
@@ -25,24 +35,76 @@ class CatalogController extends LoginController
         echo $this->render('catalog/insert.php', $params);
     }
 
-    public function saveAction()
+    public function insertDraftAction()
     {
-        $catalog = $_POST['catalog'];
+        $catalogAssoc = $_POST['catalog'];
         header('Content-type: application/json');
 
-        if (!$this->isCatalogValidFormat($catalog)) {
-            echo json_encode('{"type": "error", "message": "Poslati podaci nisu u odgovarajućem formatu."}',
+        if (!$this->isCatalogValidFormat($catalogAssoc)) {
+            echo json_encode('{"type": "error", "messages": ["Greška! Poslati podaci nisu u ispravnom formatu."]}',
                 JSON_UNESCAPED_UNICODE);
-
             exit();
         }
 
-        echo json_encode($catalog);
+        $catalog = new Catalog();
+        $catalog->setCode($catalogAssoc['code']);
+        $catalog->setName($catalogAssoc['name']);
+        $catalog->setDate($catalogAssoc['date']);
+        $catalog->setSupplier((new SupplierRepository())->loadById((int)$_SESSION['user']['id']));
+        $catalog->setState(Catalog::SAVED);
+        $catalog->setProductCodes($catalogAssoc['productCodes']);
+
+        $result = $catalog->insertDraft();
+
+        if (!empty($result)) {
+            $errors = $this->convertArrayToStringForJson($result);
+            echo json_encode('{"type": "error", "messages": [' . $errors . ']}', JSON_UNESCAPED_UNICODE);
+        } else {
+            echo json_encode('{"type": "success"}');
+            $_SESSION['message'] = $this->render('global/alert.php',
+                array('type' => 'success', 'alertText' => "<strong>Uspešno</strong> ste sačuvali katalog {$catalog->getCode()} {$catalog->getName()}!"));
+        }
     }
 
-    public function sendAction()
+    public function insertSentAction()
     {
+        $catalogAssoc = $_POST['catalog'];
+        header('Content-type: application/json');
 
+        if (!$this->isCatalogValidFormat($catalogAssoc)) {
+            echo json_encode('{"type": "error", "messages": ["Greška! Poslati podaci nisu u ispravnom formatu."]}',
+                JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $catalog = new Catalog();
+        $catalog->setCode($catalogAssoc['code']);
+        $catalog->setName($catalogAssoc['name']);
+        $catalog->setDate($catalogAssoc['date']);
+        $catalog->setSupplier((new SupplierRepository())->loadById((int)$_SESSION['user']['id']));
+        $catalog->setState(Catalog::SENT);
+        $catalog->setProductCodes($catalogAssoc['productCodes']);
+
+        $result = $catalog->insertSent();
+
+        if (!empty($result)) {
+            $errors = $this->convertArrayToStringForJson($result);
+            echo json_encode('{"type": "error", "messages": [' . $errors . ']}', JSON_UNESCAPED_UNICODE);
+        } else {
+            echo json_encode('{"type": "success"}');
+            $_SESSION['message'] = $this->render('global/alert.php',
+                array('type' => 'success', 'alertText' => "<strong>Uspešno</strong> ste poslali katalog {$catalog->getCode()} {$catalog->getName()}!"));
+        }
+    }
+
+    private function convertArrayToStringForJson($array): string
+    {
+        $items = '';
+        foreach ($array as $item) {
+            $items .= '"' . $item . '", ';
+        }
+        $items = substr($items, 0, -2);
+        return $items;
     }
 
     private function isCatalogValidFormat($catalog): bool

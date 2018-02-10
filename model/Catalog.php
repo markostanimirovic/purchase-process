@@ -3,16 +3,26 @@
 namespace model;
 
 
+use adapter\ProductAdapter;
 use common\base\BaseModel;
+use modelRepository\CatalogRepository;
 use modelRepository\SupplierRepository;
 
 class Catalog extends BaseModel
 {
+    const SAVED = 1;
+    const SENT = 2;
+    const REVERSED = 3;
+
+    private $possibleStates = [Catalog::SAVED, Catalog::SENT, Catalog::REVERSED];
+
     protected $code;
     protected $name;
     protected $date;
-    protected $products;
     protected $supplier;
+    protected $state;
+
+    protected $productCodes;
 
     public function __construct()
     {
@@ -24,7 +34,7 @@ class Catalog extends BaseModel
         return $this->code;
     }
 
-    public function setCode($code)
+    public function setCode(string $code)
     {
         $this->code = $code;
     }
@@ -34,7 +44,7 @@ class Catalog extends BaseModel
         return $this->name;
     }
 
-    public function setName($name)
+    public function setName(string $name)
     {
         $this->name = $name;
     }
@@ -44,9 +54,18 @@ class Catalog extends BaseModel
         return $this->date;
     }
 
-    public function setDate($date)
+    public function setDate(string $date, bool $fromDb = false)
     {
-        $this->date = $date;
+        if($fromDb) {
+            $date = \DateTime::createFromFormat('Y-m-d', $date);
+            $this->date = $date->format('d/m/Y');
+            return;
+        }
+
+        $date = \DateTime::createFromFormat('d/m/Y', $date);
+        if (!empty($date)) {
+            $this->date = $date->format('Y-m-d');
+        }
     }
 
     public function getSupplier()
@@ -59,11 +78,46 @@ class Catalog extends BaseModel
         $this->supplier = $supplier;
     }
 
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    public function setState($state, bool $fromDb = false)
+    {
+        if (!in_array($state, $this->possibleStates)) {
+            throw new \Exception('Error in setState function: Denied value for $state variable.');
+        }
+
+        $this->state = $state;
+
+        if ($fromDb) {
+            if ($this->state === Catalog::SAVED) {
+                $this->state = 'U pripremi';
+            } else if ($this->state === Catalog::SENT) {
+                $this->state = 'Poslat';
+            } else {
+                $this->state = 'Storniran';
+            }
+        }
+    }
+
+    public function getProductCodes()
+    {
+        return $this->productCodes;
+    }
+
+    public function setProductCodes($productCodes)
+    {
+        $this->productCodes = $productCodes;
+    }
+
     public function populate(array $dbRow): BaseModel
     {
         $this->setCode(floatval($dbRow['code']));
         $this->setName($dbRow['name']);
-        $this->setDate($dbRow['date']);
+        $this->setDate($dbRow['date'], true);
+        $this->setState($dbRow['state'], true);
         $this->setSupplier((new SupplierRepository())->loadById($dbRow['supplier_id']));
         return parent::populate($dbRow);
     }
@@ -95,6 +149,12 @@ class Catalog extends BaseModel
                     'columnType' => \PDO::PARAM_INT,
                     'columnSize' => 10,
                     'columnValue' => $this->getSupplier()->getId()
+                ),
+                'state' => array(
+                    'columnName' => '`state`',
+                    'columnType' => \PDO::PARAM_INT,
+                    'columnSize' => 1,
+                    'columnValue' => $this->getState()
                 )
             ),
             parent::getFieldMapping()
@@ -112,9 +172,122 @@ class Catalog extends BaseModel
 
         $this->code = trim($this->code);
         $this->name = trim($this->name);
-        $this->date = trim($this->date);
 
-        //TODO: implement
+        if (strlen($this->code) === 0 || strlen($this->code) > 10) {
+            $errors[] = 'Šifra kataloga nije u dobrom formatu.';
+        } else if ($this->isDuplicateCode()) {
+            $errors[] = 'Katalog sa unetom šifrom već postoji.';
+        }
+
+        if (strlen($this->name) === 0 || strlen($this->name) > 50) {
+            $errors[] = 'Naziv kataloga nije u dobrom formatu.';
+        }
+
+        if (empty($this->date)) {
+            $errors[] = 'Datum nije u dobrom formatu.';
+        }
+
+        if (empty($this->productCodes)) {
+            $errors[] = 'Katalog mora imati najmanje jedan proizvod.';
+        }
+
+        return $errors;
+    }
+
+    private function isDuplicateCode(): bool
+    {
+        $catalogRepository = new CatalogRepository();
+        $codeColumnName = '`code`';
+
+        $quotedCode = $this->getDb()->quote($this->code);
+
+        $duplicateCatalog = $catalogRepository->loadOne(true, "{$codeColumnName} = {$quotedCode}");
+
+        if (empty($duplicateCatalog)) {
+            return false;
+        }
+
+        if ($this->getId() === $duplicateCatalog->getId()) {
+            return false;
+        }
+        return true;
+    }
+
+    public function insertDraft(): array
+    {
+        $errors = array();
+
+        $result1 = $this->validate();
+        $result2 = $this->checkIfExistsProducts($this->productCodes);
+        $errors = array_merge($errors, $result1, $result2);
+        if (!empty($errors)) {
+            return $errors;
+        }
+
+        try {
+            $this->getDb()->startTransaction();
+            $this->save(false);
+            $this->setId((int)$this->getDb()->lastInsertId());
+            foreach ($this->productCodes as $productCode) {
+                $product = new Product();
+                $product->setCode($productCode);
+                $product->setCatalog($this);
+                $product->save(false);
+            }
+
+            $this->getDb()->commit();
+
+        } catch (\Exception $e) {
+            $this->getDb()->rollBack();
+            $errors[] = 'Greška prilikom čuvanja kataloga i proizvoda.';
+        } finally {
+            return $errors;
+        }
+    }
+
+    public function insertSent(): array
+    {
+        $errors = array();
+
+        $result1 = $this->validate();
+        $result2 = $this->checkIfExistsProducts($this->productCodes);
+        $errors = array_merge($errors, $result1, $result2);
+        if (!empty($errors)) {
+            return $errors;
+        }
+
+        $adapter = new ProductAdapter();
+
+        try {
+            $this->getDb()->startTransaction();
+            $this->save(false);
+            $this->setId((int)$this->getDb()->lastInsertId());
+            foreach ($this->productCodes as $productCode) {
+                $product = $adapter->getByCode($productCode);
+                $product->setCatalog($this);
+                $product->save(false);
+            }
+
+            $this->getDb()->commit();
+
+        } catch (\Exception $e) {
+            $this->getDb()->rollBack();
+            $errors[] = 'Greška prilikom čuvanja kataloga i proizvoda.';
+        } finally {
+            return $errors;
+        }
+    }
+
+    private function checkIfExistsProducts(array $productCodes)
+    {
+        $errors = array();
+        $adapter = new ProductAdapter();
+
+        foreach ($productCodes as $productCode) {
+            if(empty($adapter->getByCode($productCode, true))) {
+                $errors[] = "Proizvod sa šifrom {$productCode} ne postoji.";
+            }
+        }
 
         return $errors;
     }

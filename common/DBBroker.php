@@ -157,4 +157,9 @@ class DBBroker
     {
         return $this->pdo->quote($text, $parameterType);
     }
+
+    public function lastInsertId(string $name = null): string
+    {
+        return $this->pdo->lastInsertId($name);
+    }
 }
