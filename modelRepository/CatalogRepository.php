@@ -13,4 +13,18 @@ class CatalogRepository extends BaseModelRepository
     {
         return Catalog::class;
     }
+
+    public function load(bool $onlyActive = true, string $whereCondition = null): array
+    {
+        $condition = "supplier_id = {$_SESSION['user']['id']}";
+
+        if (!is_null($whereCondition)) {
+            $whereCondition .= ' AND ' . $condition;
+        } else {
+            $whereCondition = $condition;
+        }
+
+        return parent::load($onlyActive, $whereCondition);
+    }
+
 }

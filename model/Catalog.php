@@ -14,8 +14,6 @@ class Catalog extends BaseModel
     const SENT = 2;
     const REVERSED = 3;
 
-    private $possibleStates = [Catalog::SAVED, Catalog::SENT, Catalog::REVERSED];
-
     protected $code;
     protected $name;
     protected $date;
@@ -54,18 +52,19 @@ class Catalog extends BaseModel
         return $this->date;
     }
 
-    public function setDate(string $date, bool $fromDb = false)
+    public function setDate(string $date)
     {
-        if($fromDb) {
-            $date = \DateTime::createFromFormat('Y-m-d', $date);
-            $this->date = $date->format('d/m/Y');
-            return;
-        }
 
         $date = \DateTime::createFromFormat('d/m/Y', $date);
         if (!empty($date)) {
             $this->date = $date->format('Y-m-d');
         }
+    }
+
+    public function setDateFromDb(string $date)
+    {
+        $date = \DateTime::createFromFormat('Y-m-d', $date);
+        $this->date = $date->format('d/m/Y');
     }
 
     public function getSupplier()
@@ -83,23 +82,9 @@ class Catalog extends BaseModel
         return $this->state;
     }
 
-    public function setState($state, bool $fromDb = false)
+    public function setState($state)
     {
-        if (!in_array($state, $this->possibleStates)) {
-            throw new \Exception('Error in setState function: Denied value for $state variable.');
-        }
-
         $this->state = $state;
-
-        if ($fromDb) {
-            if ($this->state === Catalog::SAVED) {
-                $this->state = 'U pripremi';
-            } else if ($this->state === Catalog::SENT) {
-                $this->state = 'Poslat';
-            } else {
-                $this->state = 'Storniran';
-            }
-        }
     }
 
     public function getProductCodes()
@@ -114,10 +99,10 @@ class Catalog extends BaseModel
 
     public function populate(array $dbRow): BaseModel
     {
-        $this->setCode(floatval($dbRow['code']));
+        $this->setCode($dbRow['code']);
         $this->setName($dbRow['name']);
-        $this->setDate($dbRow['date'], true);
-        $this->setState($dbRow['state'], true);
+        $this->setDateFromDb($dbRow['date']);
+        $this->setState($dbRow['state']);
         $this->setSupplier((new SupplierRepository())->loadById($dbRow['supplier_id']));
         return parent::populate($dbRow);
     }
@@ -201,7 +186,7 @@ class Catalog extends BaseModel
 
         $quotedCode = $this->getDb()->quote($this->code);
 
-        $duplicateCatalog = $catalogRepository->loadOne(true, "{$codeColumnName} = {$quotedCode}");
+        $duplicateCatalog = $catalogRepository->loadOne(true, "{$codeColumnName} = {$quotedCode} AND supplier_id = {$_SESSION['user']['id']}");
 
         if (empty($duplicateCatalog)) {
             return false;
@@ -284,7 +269,7 @@ class Catalog extends BaseModel
         $adapter = new ProductAdapter();
 
         foreach ($productCodes as $productCode) {
-            if(empty($adapter->getByCode($productCode, true))) {
+            if (empty($adapter->getByCode($productCode, true))) {
                 $errors[] = "Proizvod sa šifrom {$productCode} ne postoji.";
             }
         }

@@ -1,12 +1,12 @@
 <?php
-$title = 'Dodavanje novog kataloga';
+$title = 'Izmena kataloga';
 
 ob_start();
 ?>
 
     <div class="jumbotron">
         <div class="container" style="text-align: center">
-            <h1 class="display-4"">Dodavanje novog kataloga</h1>
+            <h1 class="display-4"">Izmena kataloga</h1>
         </div>
     </div>
 
@@ -27,21 +27,22 @@ ob_start();
 
         <div class="card container">
             <form novalidate autocomplete="off">
+                <input type="text" hidden data-id="<?= $catalog->getId(); ?>">
                 <div class="form-row">
                     <div class="form-group col-md-4">
                         <label for="code" class="col-form-label">Šifra <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="code" placeholder="Šifra" name="code">
+                        <input type="text" class="form-control" id="code" placeholder="Šifra" name="code" value="<?= $catalog->getCode(); ?>">
                         <span class="text-danger" id="code-error"></span>
                     </div>
                     <div class="form-group col-md-4">
                         <label for="name" class="col-form-label">Naziv <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="name" placeholder="Naziv" name="name">
+                        <input type="text" class="form-control" id="name" placeholder="Naziv" name="name" value="<?= $catalog->getName(); ?>">
                         <span class="text-danger" id="name-error"></span>
                     </div>
                     <div class="form-group col-md-4">
                         <label for="date" class="col-form-label">Datum <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="date" placeholder="Datum" name="date"
-                               readonly="readonly" style="background:white;">
+                               readonly="readonly" style="background:white;" value="<?= $catalog->getDate(); ?>">
                         <span class="text-danger" id="date-error"></span>
                     </div>
                 </div>
@@ -64,7 +65,7 @@ ob_start();
                         <span class="text-danger" id="product-error"></span>
                     </div>
                 </div>
-                <div class="form-row" id="tableDiv" style="display:none">
+                <div class="form-row" id="tableDiv">
                     <div class="table-card card container col-md-12">
                         <table id="tableData" class="table table-hover table-bordered table-striped" cellspacing="0"
                                width="100%">
@@ -77,6 +78,21 @@ ob_start();
                                 <th></th>
                             </tr>
                             </thead>
+                            <tbody>
+                            <?php foreach ($selectedProducts as $selectedProduct) { ?>
+                                <tr>
+                                    <td><?= $selectedProduct->getCode(); ?></td>
+                                    <td><?= $selectedProduct->getName(); ?></td>
+                                    <td><?= $selectedProduct->getUnit(); ?></td>
+                                    <td><?= $selectedProduct->getPrice(); ?></td>
+                                    <td>
+                                        <button type="button" class="delete-row btn btn-danger"><i class="fa fa-trash-o"
+                                                                                                   aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -116,7 +132,7 @@ ob_start();
     <script src="/js/plugin/dataTables/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.datatables.net/select/1.2.3/js/dataTables.select.min.js"></script>
 
-    <script src="/js/catalog/insert.js"></script>
+    <script src="/js/catalog/edit.js"></script>
 <?php
 $javascript = ob_get_clean();
 ob_flush();

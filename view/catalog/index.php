@@ -20,20 +20,76 @@ ob_start();
             unset($_SESSION['message']);
         } ?>
 
+        <div class="error-message">
+
+        </div>
+
         <table id="tableData" class="table table-hover table-bordered" cellspacing="0" width="100%">
             <thead>
             <tr>
                 <th>Šifra</th>
                 <th>Naziv</th>
                 <th>Datum</th>
-                <th>Status</th>
+                <th>Stanje</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
-
+            <?php foreach ($catalogs as $catalog) { ?>
+                <tr <?php $state = $catalog->getState();
+                if ($state == 'Poslat') {
+                    echo 'class="table-success"';
+                } else if ($state == 'Storniran') {
+                    echo 'class="table-danger"';
+                } ?>>
+                    <td><?= $catalog->getCode(); ?></td>
+                    <td><?= $catalog->getName(); ?></td>
+                    <td><?= $catalog->getDate(); ?></td>
+                    <td><?= $catalog->getState(); ?></td>
+                    <td><?php if ($state == 'Poslat') { ?>
+                            <button type="button" title="Storniraj" class="reverse btn btn-danger"
+                                    data-id="<?= $catalog->getId(); ?>">
+                                <i class="fa fa-times" aria-hidden="true"></i></button>
+                        <?php } else if ($state == 'U pripremi') { ?>
+                            <button type="button" title="Izmeni" class="edit btn btn-outline-primary"
+                                    style="margin-right:1px" data-id="<?= $catalog->getId(); ?>"><i class="fa fa-pencil"
+                                                                                                    aria-hidden="true"></i>
+                            </button>
+                            <button type="button" title="Pošalji" class="send btn btn-outline-success"
+                                    style="margin-right:1px" data-id="<?= $catalog->getId(); ?>"><i
+                                        class="fa fa-paper-plane-o" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" title="Obriši" class="delete btn btn-outline-danger"
+                                    data-id="<?= $catalog->getId(); ?>">
+                                <i class="fa fa-trash-o" aria-hidden="true"></i>
+                            </button>
+                        <?php } ?></td>
+                </tr>
+            <?php } ?>
             </tbody>
         </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Ne</button>
+                    <button type="button" class="confirmed btn btn-primary">Da</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 <?php
@@ -44,6 +100,8 @@ ob_start();
     <script src="/js/plugin/dataTables/jquery.dataTables.min.js"></script>
     <script src="/js/plugin/dataTables/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.datatables.net/select/1.2.3/js/dataTables.select.min.js"></script>
+
+    <script src="/js/catalog/index.js"></script>
 
 <?php
 $javascript = ob_get_clean();
