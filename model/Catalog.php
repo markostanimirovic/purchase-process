@@ -6,6 +6,7 @@ namespace model;
 use adapter\ProductAdapter;
 use common\base\BaseModel;
 use modelRepository\CatalogRepository;
+use modelRepository\ProductRepository;
 use modelRepository\SupplierRepository;
 
 class Catalog extends BaseModel
@@ -203,7 +204,7 @@ class Catalog extends BaseModel
         $errors = array();
 
         $result1 = $this->validate();
-        $result2 = $this->checkIfExistsProducts($this->productCodes);
+        $result2 = $this->checkIfExistsProducts();
         $errors = array_merge($errors, $result1, $result2);
         if (!empty($errors)) {
             return $errors;
@@ -230,12 +231,58 @@ class Catalog extends BaseModel
         }
     }
 
+    public function updateDraft(): array
+    {
+        $errors = array();
+
+        $result1 = $this->validate();
+        $result2 = $this->checkIfExistsProducts();
+        $errors = array_merge($errors, $result1, $result2);
+        if (!empty($errors)) {
+            return $errors;
+        }
+
+        $productRepository = new ProductRepository();
+
+        try {
+            $this->getDb()->startTransaction();
+            $productRepository->deleteIfNotIn($this->productCodes, $this->getId());
+            $this->save(false);
+
+            $codesForUpdate = $productRepository->getAllProductCodesByCatalog($this->getId());
+            foreach ($codesForUpdate as $productCode) {
+                $product = new Product();
+                $product->setCode($productCode);
+                $product->setId($productRepository->getIdByCode($productCode, $this->getId()));
+                $product->setCatalog($this);
+                $product->setStatus(BaseModel::STATUS_LOAD);
+                $product->save(false);
+            }
+
+            $codesForInsert = $productRepository->getAllProductCodesForInsert($this->productCodes, $this->getId());
+
+            foreach ($codesForInsert as $productCode) {
+                $product = new Product();
+                $product->setCode($productCode);
+                $product->setCatalog($this);
+                $product->save(false);
+            }
+
+            $this->getDb()->commit();
+        } catch (\Exception $e) {
+            $this->getDb()->rollBack();
+            $errors[] = 'Greška prilikom čuvanja kataloga i proizvoda.';
+        } finally {
+            return $errors;
+        }
+    }
+
     public function insertSent(): array
     {
         $errors = array();
 
         $result1 = $this->validate();
-        $result2 = $this->checkIfExistsProducts($this->productCodes);
+        $result2 = $this->checkIfExistsProducts();
         $errors = array_merge($errors, $result1, $result2);
         if (!empty($errors)) {
             return $errors;
@@ -263,12 +310,57 @@ class Catalog extends BaseModel
         }
     }
 
-    private function checkIfExistsProducts(array $productCodes)
+    public function updateDraftToSent(): array
+    {
+        $errors = array();
+
+        $result1 = $this->validate();
+        $result2 = $this->checkIfExistsProducts();
+        $errors = array_merge($errors, $result1, $result2);
+        if (!empty($errors)) {
+            return $errors;
+        }
+
+        $productRepository = new ProductRepository();
+        $adapter = new ProductAdapter();
+
+        try {
+            $this->getDb()->startTransaction();
+            $productRepository->deleteIfNotIn($this->productCodes, $this->getId());
+            $this->save(false);
+
+            $codesForUpdate = $productRepository->getAllProductCodesByCatalog($this->getId());
+            foreach ($codesForUpdate as $productCode) {
+                $product = $adapter->getByCode($productCode);
+                $product->setId($productRepository->getIdByCode($productCode, $this->getId()));
+                $product->setCatalog($this);
+                $product->setStatus(BaseModel::STATUS_LOAD);
+                $product->save(false);
+            }
+
+            $codesForInsert = $productRepository->getAllProductCodesForInsert($this->productCodes, $this->getId());
+
+            foreach ($codesForInsert as $productCode) {
+                $product = $adapter->getByCode($productCode);
+                $product->setCatalog($this);
+                $product->save(false);
+            }
+
+            $this->getDb()->commit();
+        } catch (\Exception $e) {
+            $this->getDb()->rollBack();
+            $errors[] = 'Greška prilikom čuvanja kataloga i proizvoda.';
+        } finally {
+            return $errors;
+        }
+    }
+
+    private function checkIfExistsProducts()
     {
         $errors = array();
         $adapter = new ProductAdapter();
 
-        foreach ($productCodes as $productCode) {
+        foreach ($this->productCodes as $productCode) {
             if (empty($adapter->getByCode($productCode, true))) {
                 $errors[] = "Proizvod sa šifrom {$productCode} ne postoji.";
             }

@@ -20,7 +20,7 @@ ob_start();
             unset($_SESSION['message']);
         } ?>
 
-        <div class="error-message">
+        <div class="error-messages">
 
         </div>
 
@@ -46,7 +46,15 @@ ob_start();
                     <td><?= $catalog->getName(); ?></td>
                     <td><?= $catalog->getDate(); ?></td>
                     <td><?= $catalog->getState(); ?></td>
-                    <td><?php if ($state == 'Poslat') { ?>
+                    <td>
+                        <?php if ($state != 'U pripremi') { ?>
+                            <button type="button" title="Dodaj novi na osnovu postojećeg"
+                                    class="add-on-existing btn btn-success"
+                                    style="margin-right:1px" data-id="<?= $catalog->getId(); ?>"><i
+                                        class="fa fa-plus" aria-hidden="true"></i>
+                            </button>
+                        <?php }
+                        if ($state == 'Poslat') { ?>
                             <button type="button" title="Storniraj" class="reverse btn btn-danger"
                                     data-id="<?= $catalog->getId(); ?>">
                                 <i class="fa fa-times" aria-hidden="true"></i></button>
@@ -63,7 +71,8 @@ ob_start();
                                     data-id="<?= $catalog->getId(); ?>">
                                 <i class="fa fa-trash-o" aria-hidden="true"></i>
                             </button>
-                        <?php } ?></td>
+                        <?php } ?>
+                    </td>
                 </tr>
             <?php } ?>
             </tbody>

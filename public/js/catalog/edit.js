@@ -108,18 +108,19 @@ $(document).ready(function () {
         if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate() | !isNameValidate($('#name').val())) {
             return;
         }
-        sendDataToTheServer('insertDraft');
+        sendDataToTheServer('updateDraft');
     });
 
     $('.send').on('click', function () {
         if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate() | !isNameValidate($('#name').val())) {
             return;
         }
-        sendDataToTheServer('insertSent');
+        sendDataToTheServer('updateDraftToSent');
     });
 
     function sendDataToTheServer(method) {
-        $.post('/catalog/' + method,
+        var id = $('#catalog-id').attr('data-id');
+        $.post('/catalog/' + method + '/' + id,
             {
                 "catalog": {
                     "code": $('#code').val(),

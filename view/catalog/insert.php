@@ -30,17 +30,20 @@ ob_start();
                 <div class="form-row">
                     <div class="form-group col-md-4">
                         <label for="code" class="col-form-label">Šifra <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="code" placeholder="Šifra" name="code">
+                        <input type="text" class="form-control" id="code" placeholder="Šifra" name="code"
+                               value="<?php if (isset($catalog)) echo $catalog->getCode(); ?>">
                         <span class="text-danger" id="code-error"></span>
                     </div>
                     <div class="form-group col-md-4">
                         <label for="name" class="col-form-label">Naziv <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="name" placeholder="Naziv" name="name">
+                        <input type="text" class="form-control" id="name" placeholder="Naziv" name="name"
+                               value="<?php if (isset($catalog)) echo $catalog->getName(); ?>">
                         <span class="text-danger" id="name-error"></span>
                     </div>
                     <div class="form-group col-md-4">
                         <label for="date" class="col-form-label">Datum <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="date" placeholder="Datum" name="date"
+                               value="<?php if (isset($catalog)) echo $catalog->getDate(); ?>"
                                readonly="readonly" style="background:white;">
                         <span class="text-danger" id="date-error"></span>
                     </div>
@@ -64,7 +67,7 @@ ob_start();
                         <span class="text-danger" id="product-error"></span>
                     </div>
                 </div>
-                <div class="form-row" id="tableDiv" style="display:none">
+                <div class="form-row" id="tableDiv" <?php if (!isset($selectedProducts)) echo 'style="display:none"' ?>>
                     <div class="table-card card container col-md-12">
                         <table id="tableData" class="table table-hover table-bordered table-striped" cellspacing="0"
                                width="100%">
@@ -77,6 +80,21 @@ ob_start();
                                 <th></th>
                             </tr>
                             </thead>
+                            <tbody>
+                            <?php foreach ($selectedProducts as $selectedProduct) { ?>
+                                <tr>
+                                    <td><?= $selectedProduct->getCode(); ?></td>
+                                    <td><?= $selectedProduct->getName(); ?></td>
+                                    <td><?= $selectedProduct->getUnit(); ?></td>
+                                    <td><?= $selectedProduct->getPrice(); ?></td>
+                                    <td>
+                                        <button type="button" class="delete-row btn btn-danger"><i class="fa fa-trash-o"
+                                                                                                   aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
                         </table>
                     </div>
                 </div>

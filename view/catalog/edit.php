@@ -27,7 +27,7 @@ ob_start();
 
         <div class="card container">
             <form novalidate autocomplete="off">
-                <input type="text" hidden data-id="<?= $catalog->getId(); ?>">
+                <input type="text" hidden id="catalog-id" data-id="<?= $catalog->getId(); ?>">
                 <div class="form-row">
                     <div class="form-group col-md-4">
                         <label for="code" class="col-form-label">Šifra <span class="text-danger">*</span></label>

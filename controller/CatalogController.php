@@ -54,6 +54,41 @@ class CatalogController extends LoginController
         echo $this->render('catalog/insert.php', $params);
     }
 
+    public function insertOnExistingAction($id)
+    {
+        if (!ctype_digit((string)$id)) {
+            header('Location: /404NotFound/');
+        }
+
+        $catalogRepository = new CatalogRepository();
+        $catalog = $catalogRepository->loadById((int)$id);
+
+        if (empty($catalog) || $catalog->getSupplier()->getId() !== $_SESSION['user']['id'] || $catalog->getState() === Catalog::SAVED) {
+            header('Location: /404NotFound/');
+        }
+
+        $params = array();
+        $params['menu'] = $this->render('/menu/supplier_menu.php');
+        $params['catalog'] = $catalog;
+
+        $adapter = new ProductAdapter();
+        $params['products'] = $adapter->getAll();
+
+        $productRepository = new ProductRepository();
+        $productCodes = $productRepository->getAllProductCodesByCatalog($catalog->getId());
+        $selectedProducts = array();
+        foreach ($productCodes as $productCode) {
+            $product = $adapter->getByCode($productCode);
+            if (!empty($product)) {
+                $selectedProducts[] = $product;
+            }
+        }
+        $params['selectedProducts'] = $selectedProducts;
+
+        echo $this->render('catalog/insert.php', $params);
+        
+    }
+
     public function editAction($id)
     {
         if (!ctype_digit((string)$id)) {
@@ -75,7 +110,6 @@ class CatalogController extends LoginController
         $params['products'] = $adapter->getAll();
 
         $productRepository = new ProductRepository();
-
         $productCodes = $productRepository->getAllProductCodesByCatalog($catalog->getId());
         $selectedProducts = array();
         foreach ($productCodes as $productCode) {
@@ -94,7 +128,7 @@ class CatalogController extends LoginController
         header('Content-type: application/json');
 
         if (!ctype_digit((string)$id)) {
-            echo json_encode('{"type": "error", "message": "Id kataloga može da bude samo broj."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "messages": ["Id kataloga može da bude samo broj."]}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
@@ -102,12 +136,12 @@ class CatalogController extends LoginController
         $catalog = $catalogRepository->loadById((int)$id);
 
         if (empty($catalog) || $catalog->getSupplier()->getId() !== $_SESSION['user']['id']) {
-            echo json_encode('{"type": "error", "message": "Katalog sa poslatim id-jem ne postoji."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "messages": ["Katalog sa poslatim id-jem ne postoji."]}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
         if ($catalog->getState() !== Catalog::SAVED) {
-            echo json_encode('{"type": "error", "message": "Katalog nije u stanju U pripremi."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "messages": ["Katalog nije u stanju U pripremi."]}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
@@ -128,7 +162,7 @@ class CatalogController extends LoginController
         header('Content-type: application/json');
 
         if (!ctype_digit((string)$id)) {
-            echo json_encode('{"type": "error", "message": "Id kataloga može da bude samo broj."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "messages": ["Id kataloga može da bude samo broj."]}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
@@ -136,12 +170,12 @@ class CatalogController extends LoginController
         $catalog = $catalogRepository->loadById((int)$id);
 
         if (empty($catalog) || $catalog->getSupplier()->getId() !== $_SESSION['user']['id']) {
-            echo json_encode('{"type": "error", "message": "Katalog sa poslatim id-jem ne postoji."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "messages": ["Katalog sa poslatim id-jem ne postoji."]}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
         if ($catalog->getState() !== Catalog::SENT) {
-            echo json_encode('{"type": "error", "message": "Katalog nije u stanju Poslat."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "messages": ["Katalog nije u stanju Poslat."]}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
@@ -162,7 +196,7 @@ class CatalogController extends LoginController
         header('Content-type: application/json');
 
         if (!ctype_digit((string)$id)) {
-            echo json_encode('{"type": "error", "message": "Id kataloga može da bude samo broj."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "messages": ["Id kataloga može da bude samo broj."]}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
@@ -170,25 +204,34 @@ class CatalogController extends LoginController
         $catalog = $catalogRepository->loadById((int)$id);
 
         if (empty($catalog) || $catalog->getSupplier()->getId() !== $_SESSION['user']['id']) {
-            echo json_encode('{"type": "error", "message": "Katalog sa poslatim id-jem ne postoji."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "messages": ["Katalog sa poslatim id-jem ne postoji."]}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
         if ($catalog->getState() !== Catalog::SAVED) {
-            echo json_encode('{"type": "error", "message": "Katalog nije u stanju U pripremi."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "messages": ["Katalog nije u stanju U pripremi."]}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
-        $catalog->setState(Catalog::SENT);
         $catalog->setDate($catalog->getDate());
-        $catalog->save(false);
+        $catalog->setState(Catalog::SENT);
 
-        $_SESSION['message'] = $this->render('global/alert.php',
-            array('type' => 'success',
-                'alertText' => "<strong>Uspešno</strong> ste poslali katalog {$catalog->getCode()} {$catalog->getName()}!"));
+        $productRepository = new ProductRepository();
+        $catalog->setProductCodes($productRepository->getAllProductCodesByCatalog($catalog->getId()));
 
-        echo json_encode('{"type": "success", "message": "Selektovani katalog je uspešno poslat."}',
-            JSON_UNESCAPED_UNICODE);
+        $result = $catalog->updateDraftToSent();
+
+        if (!empty($result)) {
+            $errors = $this->convertArrayToStringForJson($result);
+            echo json_encode('{"type": "error", "messages": [' . $errors . ']}', JSON_UNESCAPED_UNICODE);
+        } else {
+            $_SESSION['message'] = $this->render('global/alert.php',
+                array('type' => 'success',
+                    'alertText' => "<strong>Uspešno</strong> ste poslali katalog {$catalog->getCode()} {$catalog->getName()}!"));
+
+            echo json_encode('{"type": "success", "message": "Selektovani katalog je uspešno poslat."}',
+                JSON_UNESCAPED_UNICODE);
+        }
     }
 
     public function insertDraftAction()
@@ -222,6 +265,54 @@ class CatalogController extends LoginController
         }
     }
 
+    public function updateDraftAction($id)
+    {
+        $catalogAssoc = $_POST['catalog'];
+        header('Content-type: application/json');
+
+        if (!ctype_digit((string)$id)) {
+            echo json_encode('{"type": "error", "messages": ["Id kataloga može da bude samo broj."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $catalogRepository = new CatalogRepository();
+        $catalog = $catalogRepository->loadById((int)$id);
+
+        if (empty($catalog) || $catalog->getSupplier()->getId() !== $_SESSION['user']['id']) {
+            echo json_encode('{"type": "error", "messages": ["Katalog sa poslatim id-jem ne postoji."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        if ($catalog->getState() !== Catalog::SAVED) {
+            echo json_encode('{"type": "error", "messages": ["Katalog nije u stanju U pripremi."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        if (!$this->isCatalogValidFormat($catalogAssoc)) {
+            echo json_encode('{"type": "error", "messages": ["Greška! Poslati podaci nisu u ispravnom formatu."]}',
+                JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $catalog->setCode($catalogAssoc['code']);
+        $catalog->setName($catalogAssoc['name']);
+        $catalog->setDate($catalogAssoc['date']);
+        $catalog->setSupplier((new SupplierRepository())->loadById((int)$_SESSION['user']['id']));
+        $catalog->setState(Catalog::SAVED);
+        $catalog->setProductCodes($catalogAssoc['productCodes']);
+
+        $result = $catalog->updateDraft();
+
+        if (!empty($result)) {
+            $errors = $this->convertArrayToStringForJson($result);
+            echo json_encode('{"type": "error", "messages": [' . $errors . ']}', JSON_UNESCAPED_UNICODE);
+        } else {
+            echo json_encode('{"type": "success"}');
+            $_SESSION['message'] = $this->render('global/alert.php',
+                array('type' => 'success', 'alertText' => "<strong>Uspešno</strong> ste izmenili katalog {$catalog->getCode()} {$catalog->getName()}!"));
+        }
+    }
+
     public function insertSentAction()
     {
         $catalogAssoc = $_POST['catalog'];
@@ -242,6 +333,54 @@ class CatalogController extends LoginController
         $catalog->setProductCodes($catalogAssoc['productCodes']);
 
         $result = $catalog->insertSent();
+
+        if (!empty($result)) {
+            $errors = $this->convertArrayToStringForJson($result);
+            echo json_encode('{"type": "error", "messages": [' . $errors . ']}', JSON_UNESCAPED_UNICODE);
+        } else {
+            echo json_encode('{"type": "success"}');
+            $_SESSION['message'] = $this->render('global/alert.php',
+                array('type' => 'success', 'alertText' => "<strong>Uspešno</strong> ste poslali katalog {$catalog->getCode()} {$catalog->getName()}!"));
+        }
+    }
+
+    public function updateDraftToSentAction($id)
+    {
+        $catalogAssoc = $_POST['catalog'];
+        header('Content-type: application/json');
+
+        if (!ctype_digit((string)$id)) {
+            echo json_encode('{"type": "error", "messages": ["Id kataloga može da bude samo broj."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $catalogRepository = new CatalogRepository();
+        $catalog = $catalogRepository->loadById((int)$id);
+
+        if (empty($catalog) || $catalog->getSupplier()->getId() !== $_SESSION['user']['id']) {
+            echo json_encode('{"type": "error", "messages": ["Katalog sa poslatim id-jem ne postoji."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        if ($catalog->getState() !== Catalog::SAVED) {
+            echo json_encode('{"type": "error", "messages": ["Katalog nije u stanju U pripremi."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        if (!$this->isCatalogValidFormat($catalogAssoc)) {
+            echo json_encode('{"type": "error", "messages": ["Greška! Poslati podaci nisu u ispravnom formatu."]}',
+                JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $catalog->setCode($catalogAssoc['code']);
+        $catalog->setName($catalogAssoc['name']);
+        $catalog->setDate($catalogAssoc['date']);
+        $catalog->setSupplier((new SupplierRepository())->loadById((int)$_SESSION['user']['id']));
+        $catalog->setState(Catalog::SENT);
+        $catalog->setProductCodes($catalogAssoc['productCodes']);
+
+        $result = $catalog->updateDraftToSent();
 
         if (!empty($result)) {
             $errors = $this->convertArrayToStringForJson($result);

@@ -67,7 +67,7 @@ $(document).ready(function () {
             if (response.type == "success") {
                 window.location = '/catalog/';
             } else {
-                echoErrorMessage(response.message);
+                echoErrorMessages(response.messages);
             }
         });
     });
@@ -77,10 +77,18 @@ $(document).ready(function () {
         window.location = '/catalog/edit/' + id;
     });
 
-    function echoErrorMessage(message) {
-        $('.error-message')
-            .append('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
-                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-                '<span aria-hidden="true">&times;</span></button>' + message + '</div>');
+    $('.add-on-existing').on('click', function () {
+        var id = $(this).attr('data-id');
+        window.location = '/catalog/insertOnExisting/' + id;
+    })
+
+    function echoErrorMessages(messages) {
+        $('.error-messages').text('');
+        $.each(messages, function (i, value) {
+            $('.error-messages')
+                .append('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span></button>' + value + '</div>');
+        });
     }
 });
