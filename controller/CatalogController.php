@@ -16,11 +16,17 @@ class CatalogController extends LoginController
     public function __construct()
     {
         $this->notLoggedIn();
-        $this->accessDenyIfNotIn([User::SUPPLIER]);
     }
 
     public function indexAction()
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER, User::EMPLOYEE]);
+
+        if ($_SESSION['user']['role'] === User::EMPLOYEE) {
+            $this->showSentCatalogs();
+            exit();
+        }
+
         $params = array();
         $params['menu'] = $this->render('menu/supplier_menu.php');
 
@@ -43,8 +49,21 @@ class CatalogController extends LoginController
         echo $this->render('catalog/index.php', $params);
     }
 
+    private function showSentCatalogs()
+    {
+        $params = array();
+        $params['menu'] = $this->render('menu/employee_menu.php');
+
+        $catalogRepository = new CatalogRepository();
+        $params['catalogs'] = $catalogRepository->loadForEmployee();
+
+        echo $this->render('catalog/show_sent.php', $params);
+    }
+
     public function insertAction()
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         $params = array();
         $params['menu'] = $this->render('menu/supplier_menu.php');
 
@@ -56,6 +75,8 @@ class CatalogController extends LoginController
 
     public function insertOnExistingAction($id)
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         if (!ctype_digit((string)$id)) {
             header('Location: /404NotFound/');
         }
@@ -86,11 +107,13 @@ class CatalogController extends LoginController
         $params['selectedProducts'] = $selectedProducts;
 
         echo $this->render('catalog/insert.php', $params);
-        
+
     }
 
     public function editAction($id)
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         if (!ctype_digit((string)$id)) {
             header('Location: /404NotFound/');
         }
@@ -125,6 +148,8 @@ class CatalogController extends LoginController
 
     public function deleteAction($id)
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         header('Content-type: application/json');
 
         if (!ctype_digit((string)$id)) {
@@ -159,6 +184,8 @@ class CatalogController extends LoginController
 
     public function reverseAction($id)
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         header('Content-type: application/json');
 
         if (!ctype_digit((string)$id)) {
@@ -193,6 +220,8 @@ class CatalogController extends LoginController
 
     public function sendAction($id)
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         header('Content-type: application/json');
 
         if (!ctype_digit((string)$id)) {
@@ -236,6 +265,8 @@ class CatalogController extends LoginController
 
     public function insertDraftAction()
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         $catalogAssoc = $_POST['catalog'];
         header('Content-type: application/json');
 
@@ -267,6 +298,8 @@ class CatalogController extends LoginController
 
     public function updateDraftAction($id)
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         $catalogAssoc = $_POST['catalog'];
         header('Content-type: application/json');
 
@@ -315,6 +348,8 @@ class CatalogController extends LoginController
 
     public function insertSentAction()
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         $catalogAssoc = $_POST['catalog'];
         header('Content-type: application/json');
 
@@ -346,6 +381,8 @@ class CatalogController extends LoginController
 
     public function updateDraftToSentAction($id)
     {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
         $catalogAssoc = $_POST['catalog'];
         header('Content-type: application/json');
 
@@ -392,6 +429,81 @@ class CatalogController extends LoginController
         }
     }
 
+    public function viewAction($id)
+    {
+        $this->accessDenyIfNotIn([User::SUPPLIER]);
+
+        header('Content-type: application/json');
+
+        if (!ctype_digit((string)$id)) {
+            echo json_encode('{"type": "error", "message": "Id kataloga može da bude samo broj."}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $catalogRepository = new CatalogRepository();
+        $catalog = $catalogRepository->loadById((int)$id);
+
+        if (empty($catalog) || $catalog->getSupplier()->getId() !== $_SESSION['user']['id']) {
+            echo json_encode('{"type": "error", "message": "Katalog sa poslatim id-jem ne postoji."}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        if ($catalog->getState() === Catalog::SAVED) {
+            echo json_encode('{"type": "error", "message": "Katalog je u stanju U pripremi."}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $productRepository = new ProductRepository();
+        $productsAssoc = $productRepository->getAllProductsAssocByCatalog($catalog->getId());
+        $productsJson = json_encode($productsAssoc);
+
+        echo json_encode('{"type": "success", "catalog": { "code": "' . $catalog->getCode() . '", "name": "'
+            . $catalog->getName() . '", "date": "' . $catalog->getDate() . '", "products": '
+            . $productsJson . '}}', JSON_UNESCAPED_UNICODE);
+    }
+
+    public function viewForEmployeeAction($id)
+    {
+        $this->accessDenyIfNotIn([User::EMPLOYEE]);
+
+        header('Content-type: application/json');
+
+        if (!ctype_digit((string)$id)) {
+            echo json_encode('{"type": "error", "message": "Id kataloga može da bude samo broj."}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $catalogRepository = new CatalogRepository();
+        $catalog = $catalogRepository->loadById((int)$id);
+
+        if (empty($catalog) || $catalog->getState() !== Catalog::SENT) {
+            echo json_encode('{"type": "error", "message": "Katalog sa poslatim id-jem ne postoji."}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $productRepository = new ProductRepository();
+        $productsAssoc = $productRepository->getAllProductsAssocByCatalog($catalog->getId());
+        $productsJson = json_encode($productsAssoc);
+        $supplierAssoc = $this->convertSupplierObjectToAssocArray($catalog->getSupplier());
+        $supplierJson = json_encode($supplierAssoc, JSON_UNESCAPED_UNICODE);
+
+        echo json_encode('{"type": "success", "catalog": { "code": "' . $catalog->getCode() . '", "name": "'
+            . $catalog->getName() . '", "date": "' . $catalog->getDate() . '", "supplier":' . $supplierJson . ', "products": '
+            . $productsJson . '}}', JSON_UNESCAPED_UNICODE);
+    }
+
+    private function convertSupplierObjectToAssocArray($supplier)
+    {
+        return array(
+            'name' => $supplier->getName(),
+            'pib' => $supplier->getPib(),
+            'street' => $supplier->getStreet(),
+            'streetNumber' => $supplier->getStreetNumber(),
+            'placeZipCode' => $supplier->getPlace()->getZipCode(),
+            'placeName' => $supplier->getPlace()->getName()
+        );
+    }
+
     private function convertArrayToStringForJson($array): string
     {
         $items = '';
@@ -407,29 +519,23 @@ class CatalogController extends LoginController
         if (empty($catalog)) {
             return false;
         }
-
         if (empty($catalog['code']) || is_array($catalog['code'])) {
             return false;
         }
-
         if (empty($catalog['name']) || is_array($catalog['name'])) {
             return false;
         }
-
         if (empty($catalog['date']) || is_array($catalog['date'])) {
             return false;
         }
-
         if (empty($catalog['productCodes']) || !is_array($catalog['productCodes'])) {
             return false;
         }
-
         foreach ($catalog['productCodes'] as $code) {
             if (empty($code) || is_array($code)) {
                 return false;
             }
         }
-
         return true;
     }
 }

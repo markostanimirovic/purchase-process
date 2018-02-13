@@ -81,7 +81,7 @@ ob_start();
                             </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($selectedProducts as $selectedProduct) { ?>
+                            <?php if (isset($selectedProducts)) foreach ($selectedProducts as $selectedProduct) { ?>
                                 <tr>
                                     <td><?= $selectedProduct->getCode(); ?></td>
                                     <td><?= $selectedProduct->getName(); ?></td>

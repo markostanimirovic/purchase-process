@@ -24,6 +24,12 @@ ob_start();
 
         </div>
 
+        <div align="center" style="padding-bottom: 10px">
+            <button type="button" class="insert btn btn-outline-success">
+                <i class="fa fa-plus" aria-hidden="true"></i> Dodaj
+            </button>
+        </div>
+
         <table id="tableData" class="table table-hover table-bordered" cellspacing="0" width="100%">
             <thead>
             <tr>
@@ -48,6 +54,12 @@ ob_start();
                     <td><?= $catalog->getState(); ?></td>
                     <td>
                         <?php if ($state != 'U pripremi') { ?>
+                            <button type="button" title="Prikaži"
+                                    class="view btn btn-primary"
+                                    style="margin-right:1px" data-id="<?= $catalog->getId(); ?>"><i
+                                        class="fa fa-search-plus" aria-hidden="true"></i>
+
+                            </button>
                             <button type="button" title="Dodaj novi na osnovu postojećeg"
                                     class="add-on-existing btn btn-success"
                                     style="margin-right:1px" data-id="<?= $catalog->getId(); ?>"><i
@@ -58,7 +70,8 @@ ob_start();
                             <button type="button" title="Storniraj" class="reverse btn btn-danger"
                                     data-id="<?= $catalog->getId(); ?>">
                                 <i class="fa fa-times" aria-hidden="true"></i></button>
-                        <?php } else if ($state == 'U pripremi') { ?>
+                        <?php }
+                        if ($state == 'U pripremi') { ?>
                             <button type="button" title="Izmeni" class="edit btn btn-outline-primary"
                                     style="margin-right:1px" data-id="<?= $catalog->getId(); ?>"><i class="fa fa-pencil"
                                                                                                     aria-hidden="true"></i>
@@ -101,6 +114,53 @@ ob_start();
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="view-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Prikaz kataloga</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="catalog-table">
+                        <tbody>
+                        <tr>
+                            <th class="table-active">Šifra</th>
+                            <td id="code-cell" class="col-md-1"></td>
+                        </tr>
+                        <tr>
+                            <th class="table-active">Naziv</th>
+                            <td id="name-cell"></td>
+                        </tr>
+                        <tr>
+                            <th class="table-active">Datum</th>
+                            <td id="date-cell"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <table class="table table-bordered" id="products-table">
+                        <thead class="table-active">
+                        <th>Šifra</th>
+                        <th>Naziv</th>
+                        <th>Jedinica mere</th>
+                        <th>Cena</th>
+                        </thead>
+                        <tbody id="products-tbody">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Zatvori</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <?php
 $content = ob_get_clean();
 ob_flush();
@@ -120,6 +180,23 @@ ob_start();
 
     <link rel="stylesheet" href="/css/dataTables.bootstrap4.min.css" type="text/css">
     <link rel="stylesheet" href="https://cdn.datatables.net/select/1.2.3/css/select.bootstrap.min.css" type="text/css">
+    <style>
+        #catalog-table td {
+            text-align: center;
+        }
+
+        #catalog-table th {
+            text-align: center;
+        }
+
+        #products-table td {
+            text-align: center;
+        }
+
+        #products-table th {
+            text-align: center;
+        }
+    </style>
 
 <?php
 $css = ob_get_clean();

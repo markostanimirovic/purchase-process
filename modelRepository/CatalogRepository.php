@@ -27,4 +27,9 @@ class CatalogRepository extends BaseModelRepository
         return parent::load($onlyActive, $whereCondition);
     }
 
+    public function loadForEmployee(): array
+    {
+        return parent::load(true, '`state` = ' . Catalog::SENT);
+    }
+
 }

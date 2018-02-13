@@ -30,6 +30,13 @@ class ProductRepository extends BaseModelRepository
         return $codes;
     }
 
+    public function getAllProductsAssocByCatalog($catalogId): array
+    {
+        $query = "SELECT * FROM `product` WHERE `catalog_id` = {$catalogId}";
+        $productsAssoc = $this->getDb()->query($query);
+        return $productsAssoc;
+    }
+
     public function deleteIfNotIn(array $productCodes, int $catalogId)
     {
         $subquery = '';
