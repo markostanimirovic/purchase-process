@@ -5,7 +5,7 @@ ob_start();
 ?>
     <div class="jumbotron">
         <div class="container" style="text-align: center">
-            <h1 class="display-4"">Pozicije</h1>
+            <h1 class="display-4">Pozicije</h1>
         </div>
     </div>
 

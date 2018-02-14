@@ -3,30 +3,28 @@
 namespace controller;
 
 
-class OrderFormController
+use model\User;
+
+class OrderFormController extends LoginController
 {
+    public function __construct()
+    {
+        $this->notLoggedIn();
+    }
+
     public function indexAction()
     {
         echo 'Narudzbenica';
     }
 
-    public function showAction()
-    {
-        
-    }
-
     public function insertAction()
     {
-        
-    }
+        $this->accessDenyIfNotIn([User::EMPLOYEE]);
 
-    public function editAction()
-    {
-        
-    }
+        $params = array();
+        $params['menu'] = $this->render('menu/employee_menu.php');
 
-    public function deleteAction()
-    {
-        
+        echo $this->render('orderForm/insert.php', $params);
+
     }
 }

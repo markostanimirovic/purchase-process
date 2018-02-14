@@ -6,7 +6,7 @@ ob_start();
 
     <div class="jumbotron">
         <div class="container" style="text-align: center">
-            <h1 class="display-4"">Izmena kataloga</h1>
+            <h1 class="display-4">Izmena kataloga</h1>
         </div>
     </div>
 
@@ -79,7 +79,7 @@ ob_start();
                             </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($selectedProducts as $selectedProduct) { ?>
+                            <?php if(isset($selectedProducts)) foreach ($selectedProducts as $selectedProduct) { ?>
                                 <tr>
                                     <td><?= $selectedProduct->getCode(); ?></td>
                                     <td><?= $selectedProduct->getName(); ?></td>

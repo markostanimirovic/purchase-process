@@ -15,11 +15,12 @@ class SupplierController extends LoginController
     public function __construct()
     {
         $this->notLoggedIn();
-        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
     }
 
     public function indexAction()
     {
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
+
         $params = array();
         $params['menu'] = $this->render('menu/admin_menu.php');
         echo $this->render('supplier/index.php', $params);
@@ -27,6 +28,8 @@ class SupplierController extends LoginController
 
     public function insertAction()
     {
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
+
         $params = array();
         $params['menu'] = $this->render('menu/admin_menu.php');
 
@@ -77,6 +80,8 @@ class SupplierController extends LoginController
 
     public function editAction($id)
     {
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
+
         if (!ctype_digit((string)$id)) {
             header("Location: /404notFound/");
             exit();
@@ -142,6 +147,8 @@ class SupplierController extends LoginController
 
     public function deactivateAction()
     {
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
+
         $id = json_decode($_POST['id']);
         if (!ctype_digit((string)$id)) {
             echo json_encode('false');
@@ -163,6 +170,8 @@ class SupplierController extends LoginController
 
     public function getAllSuppliersAction()
     {
+        $this->accessDenyIfNotIn([User::ADMINISTRATOR]);
+
         header('Content-type: application/json');
 
         $jsonArray = array();
@@ -183,5 +192,26 @@ class SupplierController extends LoginController
 
         $j['data'] = $jsonArray;
         echo json_encode($j, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function getAllSuppliersByFilterAction()
+    {
+        $this->accessDenyIfNotIn([User::EMPLOYEE]);
+
+        header('Content-type: application/json');
+
+        $filter = (!isset($_GET['filter'])) ? '' : trim($_GET['filter']);
+        $supplierRepository = new SupplierRepository();
+        $suppliers = $supplierRepository->loadByFilter($filter);
+        if (empty($suppliers)) {
+            $response = array('results' => array());
+        } else {
+            $data = array();
+            foreach ($suppliers as $supplier) {
+                $data[] = array('id' => $supplier->getId(), 'text' => $supplier->getPib() . ' ' . $supplier->getName());
+            }
+            $response = array('results' => $data);
+        }
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
     }
 }

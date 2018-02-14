@@ -249,16 +249,6 @@ class Catalog extends BaseModel
             $productRepository->deleteIfNotIn($this->productCodes, $this->getId());
             $this->save(false);
 
-            $codesForUpdate = $productRepository->getAllProductCodesByCatalog($this->getId());
-            foreach ($codesForUpdate as $productCode) {
-                $product = new Product();
-                $product->setCode($productCode);
-                $product->setId($productRepository->getIdByCode($productCode, $this->getId()));
-                $product->setCatalog($this);
-                $product->setStatus(BaseModel::STATUS_LOAD);
-                $product->save(false);
-            }
-
             $codesForInsert = $productRepository->getAllProductCodesForInsert($this->productCodes, $this->getId());
 
             foreach ($codesForInsert as $productCode) {

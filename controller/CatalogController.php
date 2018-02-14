@@ -308,6 +308,12 @@ class CatalogController extends LoginController
             exit();
         }
 
+        if (!$this->isCatalogValidFormat($catalogAssoc)) {
+            echo json_encode('{"type": "error", "messages": ["Greška! Poslati podaci nisu u ispravnom formatu."]}',
+                JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
         $catalogRepository = new CatalogRepository();
         $catalog = $catalogRepository->loadById((int)$id);
 
@@ -388,6 +394,12 @@ class CatalogController extends LoginController
 
         if (!ctype_digit((string)$id)) {
             echo json_encode('{"type": "error", "messages": ["Id kataloga može da bude samo broj."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        if (!$this->isCatalogValidFormat($catalogAssoc)) {
+            echo json_encode('{"type": "error", "messages": ["Greška! Poslati podaci nisu u ispravnom formatu."]}',
+                JSON_UNESCAPED_UNICODE);
             exit();
         }
 
@@ -490,6 +502,39 @@ class CatalogController extends LoginController
         echo json_encode('{"type": "success", "catalog": { "code": "' . $catalog->getCode() . '", "name": "'
             . $catalog->getName() . '", "date": "' . $catalog->getDate() . '", "supplier":' . $supplierJson . ', "products": '
             . $productsJson . '}}', JSON_UNESCAPED_UNICODE);
+    }
+
+    public function getAllBySupplierAction($id)
+    {
+        $this->accessDenyIfNotIn([User::EMPLOYEE]);
+
+        header('Content-type: application/json');
+
+        if (!ctype_digit((string)$id)) {
+            echo json_encode('{"type": "error", "message": "Id kataloga može da bude samo broj."}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $catalogRepository = new CatalogRepository();
+        $catalogs = $catalogRepository->loadForEmployeeBySupplier($id);
+        $catalogsAssoc = array();
+
+        foreach ($catalogs as $catalog) {
+            $catalogsAssoc[] = $this->convertCatalogObjectToAssocArray($catalog);
+        }
+
+        $catalogsJson = json_encode($catalogsAssoc);
+
+        echo json_encode('{"type": "success", "data": ' . $catalogsJson . '}');
+    }
+
+    private function convertCatalogObjectToAssocArray($catalog)
+    {
+        return array(
+            'id' => $catalog->getId(),
+            'code' => $catalog->getCode(),
+            'name' => $catalog->getName()
+        );
     }
 
     private function convertSupplierObjectToAssocArray($supplier)

@@ -6,7 +6,7 @@ ob_start();
 
     <div class="jumbotron">
         <div class="container" style="text-align: center">
-            <h1 class="display-4""><i class="fa fa-user" aria-hidden="true"></i> Profil zaposlenog</h1>
+            <h1 class="display-4"><i class="fa fa-user" aria-hidden="true"></i> Profil zaposlenog</h1>
         </div>
     </div>
 

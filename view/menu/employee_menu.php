@@ -11,9 +11,9 @@
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">Narudžbenica</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
-                    <a class="dropdown-item" href="#"><i class="fa fa-plus" aria-hidden="true"></i>
+                    <a class="dropdown-item" href="/orderForm/insert/"><i class="fa fa-plus" aria-hidden="true"></i>
                         Unos nove</a>
-                    <a class="dropdown-item" href="#"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
+                    <a class="dropdown-item" href="/orderForm/"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
                 </div>
             </li>
 

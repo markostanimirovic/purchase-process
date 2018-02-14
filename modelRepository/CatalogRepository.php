@@ -32,4 +32,9 @@ class CatalogRepository extends BaseModelRepository
         return parent::load(true, '`state` = ' . Catalog::SENT);
     }
 
+    public function loadForEmployeeBySupplier(int $supplierId): array
+    {
+        return parent::load(true, '`state` = ' . Catalog::SENT . ' AND `supplier_id` = ' . $supplierId);
+    }
+
 }

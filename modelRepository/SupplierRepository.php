@@ -30,13 +30,11 @@ class SupplierRepository extends UserRepository
         return parent::load($onlyActive, $whereCondition);
     }
 
-    public function isSupplierSelectedInCatalog()
+    public function loadByFilter(string $filter): array
     {
-        //TODO: implement
-    }
-
-    public function isSupplierSelectedInProduct()
-    {
-        //TODO: implement
+        $filter = $this->getDb()->quote("%$filter%");
+        $whereCondition = "`supplier_name` LIKE {$filter} OR `supplier_pib` LIKE {$filter}";
+        $suppliers = $this->load(true, $whereCondition);
+        return $suppliers;
     }
 }
