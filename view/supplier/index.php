@@ -168,7 +168,7 @@ ob_start();
                     } else {
                         <?php $dangerAlert = render('global/alert.php',
                         array('type' => 'danger', 'alertText' =>
-                            "<strong>Greška</strong> prilikom brisanja selektovanog reda!")); ?>
+                            "<strong>Greška</strong> prilikom brisanja selektovanog reda! Možda dobavljač ima aktivne kataloge.")); ?>
                         $('#alert-message').html('<?= $dangerAlert; ?>');
                     }
                 });

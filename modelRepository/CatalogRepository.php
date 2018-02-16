@@ -37,4 +37,14 @@ class CatalogRepository extends BaseModelRepository
         return parent::load(true, '`state` = ' . Catalog::SENT . ' AND `supplier_id` = ' . $supplierId);
     }
 
+    public function hasSupplierCatalogs($supplierId): bool
+    {
+        $query = "SELECT * FROM `catalog` as cat JOIN `user` as s ON (cat.supplier_id = s.id)" .
+            " WHERE cat.deactivated = 0 AND s.deactivated = 0 AND s.id = {$supplierId}";
+        $catalogs = $this->getDb()->query($query, true);
+        if(!empty($catalogs)) {
+            return true;
+        }
+        return false;
+    }
 }

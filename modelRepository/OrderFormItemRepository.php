@@ -17,4 +17,9 @@ class OrderFormItemRepository extends BaseModelRepository
     {
         return OrderFormItem::class;
     }
+
+    public function getAllItemsByOrderForm($orderFormId)
+    {
+        return $this->load(true, "`order_form_id` = {$orderFormId}");
+    }
 }

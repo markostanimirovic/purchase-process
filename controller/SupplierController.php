@@ -7,6 +7,7 @@ use helper\Generator;
 use helper\Mailer;
 use model\User;
 use model\Supplier;
+use modelRepository\CatalogRepository;
 use modelRepository\PlaceRepository;
 use modelRepository\SupplierRepository;
 
@@ -160,6 +161,12 @@ class SupplierController extends LoginController
         $supplier = $supplierRepository->loadById($id);
 
         if (empty($supplier)) {
+            echo json_encode('false');
+            exit();
+        }
+
+        $catalogRepository = new CatalogRepository();
+        if($catalogRepository->hasSupplierCatalogs($supplier->getId())) {
             echo json_encode('false');
             exit();
         }

@@ -17,4 +17,13 @@ class OrderFormRepository extends BaseModelRepository
     {
         return OrderForm::class;
     }
+
+    public function loadForSupplier()
+    {
+        $supplierId = $_SESSION['user']['id'];
+        $sent = OrderForm::SENT;
+        $approved = OrderForm::APPROVED;
+        $canceled = OrderForm::CANCELED;
+        return parent::load(true, "`supplier_id` = {$supplierId} AND (`state` = {$sent} OR `state` = {$approved} OR `state` = {$canceled})");
+    }
 }

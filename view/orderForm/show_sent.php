@@ -1,11 +1,11 @@
 <?php
-$title = 'Katalozi';
+$title = 'Narudžbenice';
 
 ob_start();
 ?>
     <div class="jumbotron">
         <div class="container" style="text-align: center">
-            <h1 class="display-4">Katalozi</h1>
+            <h1 class="display-4">Narudžbenice</h1>
         </div>
     </div>
 
@@ -28,24 +28,38 @@ ob_start();
             <thead>
             <tr>
                 <th>Šifra</th>
-                <th>Naziv</th>
                 <th>Datum</th>
-                <th>Dobavljač</th>
+                <th>Ukupan iznos</th>
+                <th>Stanje</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
-            <?php foreach ($catalogs as $catalog) { ?>
-                <tr>
-                    <td><?= $catalog->getCode(); ?></td>
-                    <td><?= $catalog->getName(); ?></td>
-                    <td><?= $catalog->getDate(); ?></td>
-                    <td><?= $catalog->getSupplier()->getName(); ?></td>
+            <?php foreach ($orderForms as $orderForm) { ?>
+                <tr <?php $state = $orderForm->getState();
+                if ($state == 'Odobrena') {
+                    echo 'class="table-success"';
+                } else if ($state == 'Odbijena') {
+                    echo 'class="table-danger"';
+                } ?>>
+                    <td><?= $orderForm->getCode(); ?></td>
+                    <td><?= $orderForm->getDate(); ?></td>
+                    <td><?= $orderForm->getTotalAmount(); ?></td>
+                    <td><?= $state; ?></td>
                     <td>
-                        <button type="button" data-id="<?= $catalog->getId(); ?>" class="view btn btn-outline-primary"
-                                title="Prikaži">
-                            <i class="fa fa-search-plus" aria-hidden="true"></i>
-                        </button>
+                        <?php if ($state == 'Poslata') { ?>
+                            <button type="button" title="Prikaži"
+                                    class="view btn btn-outline-primary"
+                                    data-id="<?= $orderForm->getId(); ?>" data-state="<?= $state; ?>"><i
+                                        class="fa fa-search-plus" aria-hidden="true"></i>
+                            </button>
+                        <?php } else { ?>
+                            <button type="button" title="Prikaži"
+                                    class="view btn btn-primary"
+                                    data-id="<?= $orderForm->getId(); ?>" data-state="<?= $state; ?>"><i
+                                        class="fa fa-search-plus" aria-hidden="true"></i>
+                            </button>
+                        <?php } ?>
                     </td>
                 </tr>
             <?php } ?>
@@ -59,61 +73,46 @@ ob_start();
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Prikaz kataloga</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Prikaz narudžbenice</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <table class="table table-bordered" id="catalog-table">
+                    <table class="table table-bordered" id="order-form-table">
                         <tbody>
                         <tr>
                             <th class="table-active">Šifra</th>
                             <td id="code-cell" class="col-md-6"></td>
                         </tr>
                         <tr>
-                            <th class="table-active">Naziv</th>
-                            <td id="name-cell"></td>
-                        </tr>
-                        <tr>
                             <th class="table-active">Datum</th>
                             <td id="date-cell"></td>
                         </tr>
                         <tr>
-                            <th class="table-active">Dobavljač</th>
-                            <td class="table-active"></td>
-                        </tr>
-                        <tr>
-                            <th class="table-active">PIB</th>
-                            <td id="supplier-pib-cell"></td>
-                        </tr>
-                        <tr>
-                            <th class="table-active">Ime</th>
-                            <td id="supplier-name-cell"></td>
-                        </tr>
-                        <tr>
-                            <th class="table-active">Adresa</th>
-                            <td id="street-and-number-cell"></td>
-                        </tr>
-                        <tr>
-                            <th class="table-active">Mesto</th>
-                            <td id="place-cell"></td>
+                            <th class="table-active">Ukupan iznos</th>
+                            <td id="total-amount-cell"></td>
                         </tr>
                         </tbody>
                     </table>
                     <table class="table table-bordered" id="products-table">
                         <thead class="table-active">
-                        <th>Šifra</th>
-                        <th>Naziv</th>
+                        <th>Šifra proizvoda</th>
+                        <th>Naziv proizvoda</th>
                         <th>Jedinica mere</th>
                         <th>Cena</th>
+                        <th>Količina</th>
+                        <th>Iznos</th>
                         </thead>
-                        <tbody id="products-tbody">
+                        <tbody id="items-tbody">
 
                         </tbody>
                     </table>
                 </div>
                 <div class="modal-footer">
+                    <div id="buttons">
+
+                    </div>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Zatvori</button>
                 </div>
             </div>
@@ -162,35 +161,69 @@ ob_start();
             var viewModal = $('#view-modal');
 
             $('#tableData').on('click', '.view', function () {
+                $('#buttons').text('');
                 var id = $(this).attr('data-id');
-                $.get('/catalog/viewForEmployee/' + id, function (data) {
+                var state = $(this).attr('data-state');
+
+                if (state == 'Poslata') {
+                    $('#buttons').html('<button class="approve btn btn-success" type="button" data-id="' + id + '">Odobri</button>' +
+                        '<button style="margin-left: 10px;" class="cancel btn btn-danger" type="button" data-id="' + id + '">Odbij</button>');
+                }
+
+                $.get('/orderForm/viewForSupplier/' + id, function (data) {
                     var response = JSON.parse(data);
                     if (response.type == "success") {
-                        fillCatalogModal(response.catalog);
+                        fillOrderFormModal(response.orderForm);
                         viewModal.modal('show');
                     } else {
-                        $('.error-messages').html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
-                            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-                            '<span aria-hidden="true">&times;</span></button>' + response.message + '</div>');
-
+                        echoErrorMessage(response.message);
                     }
                 });
             });
 
-            function fillCatalogModal(catalog) {
-                $('#code-cell').text(catalog.code);
-                $('#name-cell').text(catalog.name);
-                $('#date-cell').text(catalog.date);
-                $('#supplier-name-cell').text(catalog.supplier.name);
-                $('#supplier-pib-cell').text(catalog.supplier.pib);
-                $('#street-and-number-cell').text('Ulica: ' + catalog.supplier.street + ", Broj: " + catalog.supplier.streetNumber);
-                $('#place-cell').text(catalog.supplier.placeZipCode + ' ' + catalog.supplier.placeName);
-                $('#products-tbody').text('');
-                for (var i = 0; i < catalog.products.length; i++) {
-                    $('#products-tbody').append('<tr><td>' + catalog.products[i].code + '</td><td>'
-                        + catalog.products[i].name + '</td><td>' + catalog.products[i].unit +
-                        '</td><td>' + catalog.products[i].price + '</td></tr>');
+            $('#buttons').on('click', '.approve', function () {
+                var id = $(this).attr('data-id');
+                $.get('/orderForm/approve/' + id, function (data) {
+                    var response = JSON.parse(data);
+                    if (response.type == "success") {
+                        window.location = /orderForm/;
+                    } else {
+                        echoErrorMessage(response.message);
+                    }
+                    viewModal.modal('hide');
+                });
+            });
+
+            $('#buttons').on('click', '.cancel', function () {
+                var id = $(this).attr('data-id');
+                $.get('/orderForm/cancel/' + id, function (data) {
+                    var response = JSON.parse(data);
+                    if (response.type == "success") {
+                        window.location = /orderForm/;
+                    } else {
+                        echoErrorMessage(response.message);
+                    }
+                    viewModal.modal('hide');
+                });
+            });
+
+            function fillOrderFormModal(orderForm) {
+                $('#code-cell').text(orderForm.code);
+                $('#date-cell').text(orderForm.date);
+                $('#total-amount-cell').text(orderForm.totalAmount);
+                $('#items-tbody').text('');
+                for (var i = 0; i < orderForm.items.length; i++) {
+                    $('#items-tbody').append('<tr><td>' + orderForm.items[i].code + '</td><td>'
+                        + orderForm.items[i].name + '</td><td>' + orderForm.items[i].unit +
+                        '</td><td>' + orderForm.items[i].price.toFixed(2) + '</td><td>' + orderForm.items[i].quantity + '</td>' +
+                        '<td>' + orderForm.items[i].amount + '</td></tr>');
                 }
+            }
+
+            function echoErrorMessage(message) {
+                $('.error-messages').html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span></button>' + message + '</div>');
             }
         });
     </script>

@@ -187,7 +187,7 @@ class OrderForm extends BaseModel
         return true;
     }
 
-    public function saveOrderForm()
+    public function insertOrderFormWithItems()
     {
         $errors = $this->validate();
         if (!empty($errors)) {
