@@ -144,7 +144,6 @@ $(document).ready(function () {
     $.fn.editable.defaults.onblur = 'submit';
 
 
-
     function setEditable() {
         $('#tableData a').editable({
             mode: 'inline',
@@ -157,7 +156,7 @@ $(document).ready(function () {
                     return 'Unesite količinu.';
                 }
                 if (!(/^\d+$/.test(value))) {
-                    return 'Količina mora biti ceo broj.';
+                    return 'Količina mora biti pozitivan ceo broj.';
                 }
 
                 if (value == 0) {
@@ -166,7 +165,7 @@ $(document).ready(function () {
 
                 var price = $(this).attr('data-price');
                 var rowForEdit = table.row($(this).parents('tr'));
-                table.cell({row: rowForEdit.index(), column:5}).data((price * value).toFixed(2)).draw();
+                table.cell({row: rowForEdit.index(), column: 5}).data((price * value).toFixed(2)).draw();
                 calculateTotalAmount();
             }
         });
@@ -206,7 +205,7 @@ $(document).ready(function () {
             if (response.type == 'success') {
                 populateCatalogSelect(response.data);
             } else {
-
+                echoErrorMessage(response.message);
             }
         });
     });
@@ -258,7 +257,7 @@ $(document).ready(function () {
             if (response.type == 'success') {
                 populateProductSelect(response.data);
             } else {
-
+                echoErrorMessage(response.message);
             }
         });
     });
@@ -326,20 +325,6 @@ $(document).ready(function () {
         isSupplierValidate($('#supplier').val());
     });
 
-    $('.save').on('click', function () {
-        // if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate()) {
-        //     return;
-        // }
-        // sendDataToTheServer('insertDraft');
-    });
-
-    $('.send').on('click', function () {
-        // if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate()) {
-        //     return;
-        // }
-        // sendDataToTheServer('insertSent');
-    });
-
     function populateProductSelect(products) {
         $.each(products, function (i, product) {
             if (i == 0) {
@@ -367,23 +352,56 @@ $(document).ready(function () {
         });
     }
 
-    function sendDataToTheServer(method) {
-        $.post('/catalog/' + method,
+    $('.save').on('click', function () {
+        if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate() |
+            !isSupplierValidate($('#supplier').val()) | !isCatalogValidate($('#catalog').val())) {
+            return;
+        }
+        sendDataToTheServerDraft('insertDraft');
+    });
+
+    $('.send').on('click', function () {
+        if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate() |
+            !isSupplierValidate($('#supplier').val()) | !isCatalogValidate($('#catalog').val())) {
+            return;
+        }
+        sendDataToTheServerDraft('insertSent');
+    });
+
+    function sendDataToTheServerDraft(method) {
+        $.post('/orderForm/' + method,
             {
-                "catalog": {
+                "orderForm": {
                     "code": $('#code').val(),
-                    "name": $('#name').val(),
                     "date": $('#date').val(),
-                    "productCodes": getArrayOfCodes()
+                    "supplierId": $('#supplier').val(),
+                    "catalogId": $('#catalog').val(),
+                    "items": getArrayOfItems()
                 }
             }, function (data) {
                 var response = JSON.parse(data);
                 if (response.type == 'success') {
-                    window.location = '/catalog/';
+                    window.location = '/orderForm/';
                 } else {
                     echoErrorMessages(response.messages);
                 }
             });
+    }
+
+    function getArrayOfItems() {
+        var tbl = document.getElementById('tableData');
+        var items = Array();
+        var rowLength = tbl.rows.length;
+        var j = 0;
+        for (var i = 1; i < rowLength; i++) {
+            item = new Object();
+            var row = tbl.rows[i];
+            item.productId = $(row).attr('id');
+            item.quantity = $(row.cells[4]).html().replace(/(<([^>]+)>)/ig, "");
+            items[j] = item;
+            j++;
+        }
+        return items;
     }
 
     function echoErrorMessages(messages) {
@@ -396,8 +414,15 @@ $(document).ready(function () {
         });
     }
 
+    function echoErrorMessage(message) {
+        $('.error-messages')
+            .html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                '<span aria-hidden="true">&times;</span></button>' + message + '</div>');
+    }
+
     function isCodeValidate(code) {
-        if (code == undefined || code == "") {
+        if (code == undefined || code.trim() == "") {
             $('#code-error').text('Šifra ne sme da bude prazno polje.');
             return false;
         } else if (code.length > 20) {
@@ -437,7 +462,7 @@ $(document).ready(function () {
 
     function isTableValidate() {
         if (table.rows().count() == 0) {
-            $('#product-error').text('Katalog mora imati najmanje jedan proizvod.');
+            $('#product-error').text('Narudžbenica mora imati najmanje jednu stavku.');
             return false;
         }
         $('#product-error').text('');

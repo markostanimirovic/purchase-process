@@ -10,6 +10,7 @@ use modelRepository\ProductRepository;
 class OrderFormItem extends BaseModel
 {
     protected $quantity;
+    protected $amount;
     protected $orderForm;
     protected $product;
 
@@ -23,28 +24,32 @@ class OrderFormItem extends BaseModel
         $this->quantity = $quantity;
     }
 
-    /**
-     * @return OrderForm
-     */
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    public function setAmount($amount)
+    {
+        $this->amount = $amount;
+    }
+
     public function getOrderForm()
     {
         return $this->orderForm;
     }
 
-    public function setOrderForm(OrderForm $orderForm)
+    public function setOrderForm($orderForm)
     {
         $this->orderForm = $orderForm;
     }
 
-    /**
-     * @return Product
-     */
     public function getProduct()
     {
         return $this->product;
     }
 
-    public function setProduct(Product $product)
+    public function setProduct($product)
     {
         $this->product = $product;
     }
@@ -52,6 +57,7 @@ class OrderFormItem extends BaseModel
     public function populate(array $dbRow): BaseModel
     {
         $this->setQuantity($dbRow['quantity']);
+        $this->setAmount($dbRow['amount']);
         $this->setOrderForm((new OrderFormRepository())->loadById($dbRow['order_form_id']));
         $this->setProduct((new ProductRepository())->loadById($dbRow['product_id']));
         return parent::populate($dbRow);
@@ -62,22 +68,28 @@ class OrderFormItem extends BaseModel
         return array_merge_recursive(
             array(
                 'quantity' => array(
-                    'columnName' => 'quantity',
+                    'columnName' => '`quantity`',
                     'columnType' => \PDO::PARAM_INT,
                     'columnSize' => 10,
                     'columnValue' => $this->getQuantity()
                 ),
+                'amount' => array(
+                    'columnName' => '`amount`',
+                    'columnType' => \PDO::PARAM_STR,
+                    'columnSize' => 12,
+                    'columnValue' => $this->getAmount()
+                ),
                 'orderForm' => array(
-                    'columnName' => 'order_form_id',
+                    'columnName' => '`order_form_id`',
                     'columnType' => \PDO::PARAM_INT,
                     'columnSize' => 10,
                     'columnValue' => $this->getOrderForm()->getId()
                 ),
                 'product' => array(
-                    'columnName' => 'product_id',
+                    'columnName' => '`product_id`',
                     'columnType' => \PDO::PARAM_INT,
                     'columnSize' => 10,
-                    'columnValue' => $this->getOrderForm()->getId()
+                    'columnValue' => $this->getProduct()->getId()
                 )
             ),
             parent::getFieldMapping()
@@ -86,7 +98,7 @@ class OrderFormItem extends BaseModel
 
     public static function getTableName(): string
     {
-        return 'order_form_item';
+        return '`order_form_item`';
     }
 
     protected function validate(): array

@@ -55,7 +55,6 @@ class Catalog extends BaseModel
 
     public function setDate(string $date)
     {
-
         $date = \DateTime::createFromFormat('d/m/Y', $date);
         if (!empty($date)) {
             $this->date = $date->format('Y-m-d');
