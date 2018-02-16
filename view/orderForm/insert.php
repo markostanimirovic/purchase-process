@@ -47,8 +47,6 @@ ob_start();
                                     class="text-danger">*</span></label>
                         <div id="supplier-select-div">
                             <select class="form-control" id="supplier" name="supplier">
-                                <option value="" hidden></option>
-                                <option value="1">1</option>
                             </select>
                         </div>
                         <span class="text-danger" id="supplier-error"></span>
@@ -57,7 +55,7 @@ ob_start();
                         <label class="col-form-label">Katalog <span class="text-danger">*</span></label>
                         <div id="catalog-select-div">
                             <select class="form-control" id="catalog" name="catalog">
-                                <option hidden></option>
+                                <option value="-1"></option>
                             </select>
                         </div>
                         <span class="text-danger" id="catalog-error"></span>
@@ -69,14 +67,13 @@ ob_start();
                         <label for="product" class="col-form-label">Proizvod <span class="text-danger">*</span></label>
                         <select id="product" class="form-control" name="product">
                         </select>
-                        <span class="text-danger" id="product-error"></span>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="unit" class="col-form-label">Merna jedinica</label>
                         <input type="text" class="form-control" id="unit" placeholder="Merna jedinica" name="unit"
                                readonly="readonly" style="background:white;">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="price" class="col-form-label">Cena</label>
                         <input type="text" class="form-control" id="price" placeholder="Cena" name="price"
                                readonly="readonly" style="background:white;">
@@ -87,12 +84,20 @@ ob_start();
                                readonly="readonly" style="background:white;">
 
                     </div>
-                    <div class="col-md-1">
-                        <button type="button" class="add btn btn-primary" style="position:absolute;bottom:0.5px;">Dodaj</button>
+                    <div class="col-md-2">
+                        <label for="amount" class="col-form-label">Iznos</label>
+                        <input type="text" class="form-control" id="amount" name="amount"
+                               readonly="readonly" style="background:white;" value="0">
                     </div>
+                    <div class="col-md-1">
+                        <button type="button" class="add btn btn-primary" style="margin-top: 38px">
+                            Dodaj
+                        </button>
+                    </div>
+                    <span class="text-danger" id="product-error" style="margin-left: 5px;"></span>
                 </div>
                 <div class="form-row" id="tableDiv" style="display:none">
-                    <div class="table-card card container col-md-12">
+                    <div class="table-card card container col-md-12" style="margin-top: 10px;">
                         <table id="tableData" class="table table-hover table-bordered table-striped" cellspacing="0"
                                width="100%">
                             <thead>
@@ -101,7 +106,7 @@ ob_start();
                                 <th>Naziv</th>
                                 <th>Jedinica mere</th>
                                 <th>Cena</th>
-                                <th>Količina</th>
+                                <th title="Količinu možete menjati">Količina <i class="fa fa-pencil" aria-hidden="true"></i></th>
                                 <th>Iznos</th>
                                 <th></th>
                             </tr>
@@ -109,7 +114,13 @@ ob_start();
                             <tbody>
                             </tbody>
                         </table>
+                        <div class="form-group row" style="margin-left: 12px; margin-top: 10px;">
+                            <label class="col-form-label">Ukupan iznos:</label>&nbsp;
+                            <input type="text" class="form-control col-md-2" id="total-amount" name="total-amount"
+                                   readonly="readonly" style="background:white;" value="0">
+                        </div>
                     </div>
+
                 </div>
                 <hr>
                 <div class="form-row">
@@ -147,6 +158,8 @@ ob_start();
     <script src="/js/plugin/dataTables/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.datatables.net/select/1.2.3/js/dataTables.select.min.js"></script>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+
     <script src="/js/orderForm/insert.js"></script>
 <?php
 $javascript = ob_get_clean();
@@ -158,6 +171,30 @@ ob_start();
 
     <link rel="stylesheet" href="/css/dataTables.bootstrap4.min.css" type="text/css">
     <link rel="stylesheet" href="https://cdn.datatables.net/select/1.2.3/css/select.bootstrap.min.css" type="text/css">
+
+<!--    <link href="/css/bootstrap-editable.css" rel="stylesheet"/>-->
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+
+    <style>
+        .editable-field {
+            width: 100px !important;
+        }
+        .editable-error-block {
+            position: absolute !important;
+            margin-top: 30px !important;
+            color: #dc3545 !important;
+        }
+
+        .editable-click {
+            color: #212529 !important;
+            border-bottom: none !important;
+        }
+
+        .editable-unsaved {
+            font-weight: normal !important;
+        }
+    </style>
 <?php
 $css = ob_get_clean();
 ob_flush();

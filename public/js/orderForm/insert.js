@@ -36,14 +36,16 @@ $(document).ready(function () {
         width: '100%',
         allowClear: true,
         multiple: false,
-        placeholder: "Katalog"
+        placeholder: {
+            id: '-1',
+            text: 'Katalog'
+        }
     });
 
-    $('#product').select2({
+    var productSelect = $('#product').select2({
         width: '100%',
-        allowClear: true,
         multiple: false,
-        placeholder: "Proizvod"
+        placeholder: 'Proizvod'
     });
 
     var table = $('#tableData').DataTable({
@@ -51,7 +53,7 @@ $(document).ready(function () {
         info: false,
         paging: false,
         columnDefs: [
-            {orderable: false, targets: -1}
+            {targets: -1, orderable: false}
         ],
         language: {
             "sProcessing": "Procesiranje u toku...",
@@ -75,52 +77,133 @@ $(document).ready(function () {
         }
     });
 
+    $('#tableData a').editable({
+        mode: 'inline',
+        type: 'text',
+        step: '1',
+        min: '1',
+        inputclass: 'editable-field',
+        validate: function (value) {
+            if (value == '') {
+                return 'Unesite količinu.';
+            }
+            if (!(/^\d+$/.test(value))) {
+                return 'Količina mora biti ceo broj.';
+            }
+
+            if (value == 0) {
+                return 'Količina mora biti broj veći od nule.'
+            }
+        }
+    });
+
     var spinner = $('#quantity').spinner({
         min: 1
     }).val(1);
 
     $('.add').on('click', function () {
-        var code = $('#product').find(':selected').val();
-
-        if (code == "" || code == undefined) {
-            $('#product-error').text('Niste izabrali proizvod.');
-            return;
-        }
-
-        var exists = false;
-        table.rows().every(function (rowId) {
-            if (table.cell(rowId, 0).data() == code) {
-                $('#product-error').text('Izabrani proizvod već postoji u katalogu.');
-                exists = true;
-                return;
-            }
-        });
-        if (exists == true) {
-            return;
-        }
+        var id = $('#product').val();
 
         $('#product-error').text('');
-        $.get('/product/getProductByCode/' + code, function (product) {
-            if (product.code == undefined) {
-                $('#product-error').text('Izabrani proizvod ne postoji.');
-            } else {
-                if (table.rows().count() == 0) {
-                    $('#tableDiv').show();
-                }
-                table.row.add([
-                    product.code, product.name, product.unit, product.price,
-                    '<button type="button" class="delete-row btn btn-danger" ><i class="fa fa-trash-o" aria-hidden="true"></i></button>'
-                ]).draw(false);
-            }
-        });
+        if (id == undefined) {
+            $('#product-error').html('Izaberite proizvod. <span class="text-primary">Napomena: Prvo morate izabrati katalog.</span>');
+            return;
+        }
+        if (table.rows('[id=' + id + ']').any()) {
+            $('#product-error').text('Proizvod već postoji u stavkama narudžbenice.');
+            return;
+        }
+
+        var code = $('#product').select2().find(':selected').data('code');
+        var name = $('#product').select2().find(':selected').data('name');
+        var unit = $('#product').select2().find(':selected').data('unit');
+        var price = $('#product').select2().find(':selected').data('price');
+        var quantity = '<a href="#" data-price="' + price + '">' + spinner.spinner('value') + '</a>';
+        var amount = $('#amount').val();
+        var delButton = '<button type="button" class="delete-row btn btn-danger">' +
+            '<i class="fa fa-trash-o" aria-hidden="true"></i></button>';
+
+        if (table.rows().count() == 0) {
+            $('#tableDiv').show();
+        }
+        table.row.add([code, name, unit, price.toFixed(2), quantity, amount, delButton]).node().id = id;
+        table.draw(false);
+
+        var totalAmount = parseFloat($('#total-amount').val());
+        var parsedAmount = parseFloat(amount);
+        $('#total-amount').val((totalAmount + parsedAmount).toFixed(2));
+
+        setEditable();
+
     });
 
+    $.fn.editableform.buttons =
+        '<button type="submit" title="Potvrdi" class="submit-edit btn btn-primary editable-submit" style="height: 36.8px;"><i class="fa fa-check" aria-hidden="true"></i></button>' +
+        '<button type="button" title="Odustani" class="btn btn-secondary editable-cancel" style="height: 36.8px;"><i class="fa fa-times" aria-hidden="true"></i></button>';
+
+    $.fn.editable.defaults.onblur = 'submit';
+
+
+
+    function setEditable() {
+        $('#tableData a').editable({
+            mode: 'inline',
+            type: 'text',
+            step: '1',
+            min: '1',
+            inputclass: 'editable-field',
+            validate: function (value) {
+                if (value == '') {
+                    return 'Unesite količinu.';
+                }
+                if (!(/^\d+$/.test(value))) {
+                    return 'Količina mora biti ceo broj.';
+                }
+
+                if (value == 0) {
+                    return 'Količina mora biti broj veći od nule.'
+                }
+
+                var price = $(this).attr('data-price');
+                var rowForEdit = table.row($(this).parents('tr'));
+                table.cell({row: rowForEdit.index(), column:5}).data((price * value).toFixed(2)).draw();
+                calculateTotalAmount();
+            }
+        });
+    }
+
+    function calculateTotalAmount() {
+        var sum = 0;
+        table.rows().every(function (rowId) {
+            sum += parseFloat(table.cell(rowId, 5).data());
+        });
+        $('#total-amount').val(sum.toFixed(2));
+    }
+
     $('#supplier').on('select2:select', function () {
-        $('#catalog').text('');
+        $('#supplier-error').text('');
+        $('#catalog').empty();
+        var opt = document.createElement('option');
+        opt.value = -1;
+        $('#catalog').append(opt);
+
+        productSelect.empty();
+        productSelect = $('#product').select2({
+            width: '100%',
+            multiple: false,
+            placeholder: 'Proizvod'
+        });
+
+        $('#unit').val('');
+        $('#price').val('');
+        $('#quantity').val(1);
+        $('#amount').val(0);
+        $('#total-amount').val(0);
+
         var id = this.value;
         $.get('/catalog/getAllBySupplier/' + id, function (data) {
             var response = JSON.parse(data);
-            if (response.type == "success") {
+            if (response.type == 'success') {
                 populateCatalogSelect(response.data);
             } else {
 
@@ -129,13 +212,101 @@ $(document).ready(function () {
     });
 
     $('#supplier').on('select2:unselect', function () {
-        $('#catalog').text('');
+        $('#catalog').empty();
+        var opt = document.createElement('option');
+        opt.value = -1;
+        $('#catalog').append(opt);
+
+        productSelect.empty();
+        productSelect = $('#product').select2({
+            width: '100%',
+            multiple: false,
+            placeholder: 'Proizvod'
+        });
+
+        $('#unit').val('');
+        $('#price').val('');
+        $('#quantity').val(1);
+        $('#amount').val(0);
+        $('#total-amount').val(0);
+
+        table.clear().draw();
+        $('#tableDiv').hide();
+    });
+
+    $('#catalog').on('select2:select', function () {
+        $('#catalog-error').text('');
+
+        productSelect.empty();
+        productSelect = $('#product').select2({
+            width: '100%',
+            multiple: false,
+            placeholder: 'Proizvod'
+        });
+
+        $('#unit').val('');
+        $('#price').val('');
+        $('#quantity').val(1);
+        $('#amount').val(0);
+        $('#total-amount').val(0);
+
+        table.clear().draw();
+        $('#tableDiv').hide();
+        var id = this.value;
+        $.get('/product/getAllByCatalog/' + id, function (data) {
+            var response = JSON.parse(data);
+            if (response.type == 'success') {
+                populateProductSelect(response.data);
+            } else {
+
+            }
+        });
+    });
+
+    $('#catalog').on('select2:unselect', function () {
+        productSelect.empty();
+        productSelect = $('#product').select2({
+            width: '100%',
+            multiple: false,
+            placeholder: 'Proizvod'
+        });
+
+        $('#unit').val('');
+        $('#price').val('');
+        $('#quantity').val(1);
+        $('#amount').val(0);
+        $('#total-amount').val(0);
+
+        table.clear().draw();
+        $('#tableDiv').hide();
+    });
+
+    $('#product').on('select2:select', function () {
+        var unit = $('#product').select2().find(':selected').data('unit');
+        var price = $('#product').select2().find(':selected').data('price');
+        $('#unit').val(unit);
+        $('#price').val(price.toFixed(2));
+        $('#amount').val(price.toFixed(2));
+        $('#quantity').val(1);
+    });
+
+    $("#quantity").spinner({
+        spin: function (event, ui) {
+            var amount = $('#amount').val();
+            var price = $('#price').val();
+            if (amount > 0) {
+                $('#amount').val((ui.value * price).toFixed(2));
+            }
+        }
     });
 
     $('#tableDiv').on('click', '.delete-row', function () {
         table.row($(this).parents('tr')).remove().draw();
         if (table.rows().count() == 0) {
+            $('#total-amount').val(0);
             $('#tableDiv').hide();
+        } else {
+            calculateTotalAmount();
         }
     });
 
@@ -156,23 +327,38 @@ $(document).ready(function () {
     });
 
     $('.save').on('click', function () {
-        if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate()) {
-            return;
-        }
-        sendDataToTheServer('insertDraft');
+        // if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate()) {
+        //     return;
+        // }
+        // sendDataToTheServer('insertDraft');
     });
 
     $('.send').on('click', function () {
-        if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate()) {
-            return;
-        }
-        sendDataToTheServer('insertSent');
+        // if (!isCodeValidate($('#code').val()) | !isDateValidate($('#date').val()) | !isTableValidate()) {
+        //     return;
+        // }
+        // sendDataToTheServer('insertSent');
     });
 
+    function populateProductSelect(products) {
+        $.each(products, function (i, product) {
+            if (i == 0) {
+                $('#unit').val(product.unit);
+                $('#price').val(product.price.toFixed(2));
+                $('#amount').val(product.price.toFixed(2));
+            }
+            var opt = document.createElement('option');
+            opt.value = product.id;
+            opt.innerHTML = product.code + ' ' + product.name;
+            opt.setAttribute('data-code', product.code);
+            opt.setAttribute('data-name', product.name);
+            opt.setAttribute('data-price', product.price);
+            opt.setAttribute('data-unit', product.unit);
+            $('#product').append(opt);
+        });
+    }
+
     function populateCatalogSelect(catalogs) {
-        var opt = document.createElement('option');
-        opt.setAttribute('type', 'hidden');
-        $('#catalog').append(opt);
         $.each(catalogs, function (i, catalog) {
             var opt = document.createElement('option');
             opt.value = catalog.id;
@@ -210,18 +396,6 @@ $(document).ready(function () {
         });
     }
 
-    function getArrayOfCodes() {
-        var codes = Array();
-        var i = 0;
-
-        table.rows().every(function (rowId) {
-            codes[i] = table.cell(rowId, 0).data();
-            i++;
-        });
-
-        return codes;
-    }
-
     function isCodeValidate(code) {
         if (code == undefined || code == "") {
             $('#code-error').text('Šifra ne sme da bude prazno polje.');
@@ -253,7 +427,7 @@ $(document).ready(function () {
     }
 
     function isCatalogValidate(catalog) {
-        if (catalog == undefined || catalog == "") {
+        if (catalog == -1) {
             $('#catalog-error').html('Izaberite katalog. <span class="text-primary">Napomena: Prvo morate izabrati dobavljača.</span>');
             return false;
         }

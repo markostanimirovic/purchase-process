@@ -511,7 +511,7 @@ class CatalogController extends LoginController
         header('Content-type: application/json');
 
         if (!ctype_digit((string)$id)) {
-            echo json_encode('{"type": "error", "message": "Id kataloga može da bude samo broj."}', JSON_UNESCAPED_UNICODE);
+            echo json_encode('{"type": "error", "message": "Id dobavljača može da bude samo broj."}', JSON_UNESCAPED_UNICODE);
             exit();
         }
 
