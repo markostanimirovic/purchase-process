@@ -3,6 +3,7 @@
 namespace controller;
 
 
+use common\base\BaseModel;
 use model\OrderForm;
 use model\OrderFormItem;
 use model\Supplier;
@@ -392,6 +393,114 @@ class OrderFormController extends LoginController
                 'alertText' => "<strong>Uspešno</strong> ste odbili narudžbenicu {$orderForm->getCode()}!"));
 
         echo json_encode('{"type": "success", "message": "Narudžbenica je uspešno odbijena."}',
+            JSON_UNESCAPED_UNICODE);
+    }
+
+    public function deleteAction($id)
+    {
+        $this->accessDenyIfNotIn([User::EMPLOYEE]);
+
+        header('Content-type: application/json');
+
+        if (!ctype_digit((string)$id)) {
+            echo json_encode('{"type": "error", "messages": ["Id narudžbenice može da bude samo broj."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $orderFormRepository = new OrderFormRepository();
+        $orderForm = $orderFormRepository->loadById((int)$id);
+
+        if (empty($orderForm)) {
+            echo json_encode('{"type": "error", "messages": ["Narudžbenica sa poslatim id-jem ne postoji."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        if ($orderForm->getState() !== OrderForm::SAVED) {
+            echo json_encode('{"type": "error", "messages": ["Narudžbenica nije u stanju U pripremi."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $orderForm->setDeactivated(BaseModel::DEACTIVATE);
+        $orderForm->setDate($orderForm->getDate());
+        $orderForm->save(false);
+
+        $_SESSION['message'] = $this->render('global/alert.php',
+            array('type' => 'success',
+                'alertText' => "<strong>Uspešno</strong> ste obrisali narudžbenicu {$orderForm->getCode()}!"));
+
+        echo json_encode('{"type": "success", "message": "Narudžbenica je uspešno obrisana."}',
+            JSON_UNESCAPED_UNICODE);
+    }
+
+    public function sendAction($id)
+    {
+        $this->accessDenyIfNotIn([User::EMPLOYEE]);
+
+        header('Content-type: application/json');
+
+        if (!ctype_digit((string)$id)) {
+            echo json_encode('{"type": "error", "messages": ["Id narudžbenice može da bude samo broj."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $orderFormRepository = new OrderFormRepository();
+        $orderForm = $orderFormRepository->loadById((int)$id);
+
+        if (empty($orderForm)) {
+            echo json_encode('{"type": "error", "messages": ["Narudžbenica sa poslatim id-jem ne postoji."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        if ($orderForm->getState() !== OrderForm::SAVED) {
+            echo json_encode('{"type": "error", "messages": ["Narudžbenica nije u stanju U pripremi."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $orderForm->setState(OrderForm::SENT);
+        $orderForm->setDate($orderForm->getDate());
+        $orderForm->save(false);
+
+        $_SESSION['message'] = $this->render('global/alert.php',
+            array('type' => 'success',
+                'alertText' => "<strong>Uspešno</strong> ste poslali narudžbenicu {$orderForm->getCode()}!"));
+
+        echo json_encode('{"type": "success", "message": "Narudžbenica je uspešno poslata."}',
+            JSON_UNESCAPED_UNICODE);
+    }
+
+    public function reverseAction($id)
+    {
+        $this->accessDenyIfNotIn([User::EMPLOYEE]);
+
+        header('Content-type: application/json');
+
+        if (!ctype_digit((string)$id)) {
+            echo json_encode('{"type": "error", "messages": ["Id narudžbenice može da bude samo broj."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $orderFormRepository = new OrderFormRepository();
+        $orderForm = $orderFormRepository->loadById((int)$id);
+
+        if (empty($orderForm)) {
+            echo json_encode('{"type": "error", "messages": ["Narudžbenica sa poslatim id-jem ne postoji."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        if ($orderForm->getState() !== OrderForm::SENT) {
+            echo json_encode('{"type": "error", "messages": ["Narudžbenica nije u stanju Poslata."]}', JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+
+        $orderForm->setState(OrderForm::REVERSED);
+        $orderForm->setDate($orderForm->getDate());
+        $orderForm->save(false);
+
+        $_SESSION['message'] = $this->render('global/alert.php',
+            array('type' => 'success',
+                'alertText' => "<strong>Uspešno</strong> ste stornirali narudžbenicu {$orderForm->getCode()}!"));
+
+        echo json_encode('{"type": "success", "message": "Narudžbenica je uspešno stornirana."}',
             JSON_UNESCAPED_UNICODE);
     }
 

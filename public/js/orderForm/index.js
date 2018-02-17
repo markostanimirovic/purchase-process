@@ -33,7 +33,7 @@ $(document).ready(function () {
     $('#tableData').on('click', '.delete', function () {
         var id = $(this).attr('data-id');
         modal.find('.modal-title').text('Potvrda brisanja');
-        modal.find('.modal-body').text('Da li ste sigurni da želite da obrišete selektovani katalog?');
+        modal.find('.modal-body').text('Da li ste sigurni da želite da obrišete selektovanu narudžbenicu?');
         modal.find('.confirmed').attr('data-id', id);
         modal.find('.confirmed').attr('action', 'delete');
         modal.modal('show');
@@ -42,7 +42,7 @@ $(document).ready(function () {
     $('#tableData').on('click', '.send', function () {
         var id = $(this).attr('data-id');
         modal.find('.modal-title').text('Potvrda slanja');
-        modal.find('.modal-body').text('Da li ste sigurni da želite da pošaljete selektovani katalog?');
+        modal.find('.modal-body').text('Da li ste sigurni da želite da pošaljete selektovanu narudžbenicu?');
         modal.find('.confirmed').attr('data-id', id);
         modal.find('.confirmed').attr('action', 'send');
         modal.modal('show');
@@ -50,14 +50,14 @@ $(document).ready(function () {
 
     $('#tableData').on('click', '.edit', function () {
         var id = $(this).attr('data-id');
-        window.location = '/catalog/edit/' + id;
+        window.location = '/orderForm/edit/' + id;
     });
 
 
     $('#tableData').on('click', '.reverse', function () {
         var id = $(this).attr('data-id');
         modal.find('.modal-title').text('Potvrda storniranja');
-        modal.find('.modal-body').text('Da li ste sigurni da želite da stornirate selektovani katalog?');
+        modal.find('.modal-body').text('Da li ste sigurni da želite da stornirate selektovanu narudžbenicu?');
         modal.find('.confirmed').attr('data-id', id);
         modal.find('.confirmed').attr('action', 'reverse');
         modal.modal('show');
@@ -65,7 +65,7 @@ $(document).ready(function () {
 
     $('#tableData').on('click', '.add-on-existing', function () {
         var id = $(this).attr('data-id');
-        window.location = '/catalog/insertOnExisting/' + id;
+        window.location = '/orderForm/insertOnExisting/' + id;
     });
 
 
@@ -88,10 +88,10 @@ $(document).ready(function () {
 
         modal.modal('hide');
 
-        $.get('/catalog/' + action + '/' + id, function (data) {
+        $.get('/orderForm/' + action + '/' + id, function (data) {
             var response = JSON.parse(data);
             if (response.type == "success") {
-                window.location = '/catalog/';
+                window.location = '/orderForm/';
             } else {
                 echoErrorMessages(response.messages);
             }

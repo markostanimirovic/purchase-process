@@ -45,6 +45,13 @@
                     <a class="dropdown-item" href="/position/"><i class="fa fa-table" aria-hidden="true"></i> Prikaz svih</a>
                 </div>
             </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">Statistika</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                    <a class="dropdown-item" href="/statistic/orderForm/"><i class="fa fa-pie-chart" aria-hidden="true"></i> Narudžbenica</a>
+                </div>
+            </li>
         </ul>
 
         <ul class="navbar-nav ml-auto">
