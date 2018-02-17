@@ -30,6 +30,11 @@ class ProductRepository extends BaseModelRepository
         return $codes;
     }
 
+    public function getAllProductsByCatalog(int $catalogId): array
+    {
+        return $this->load(true, "`catalog_id` = {$catalogId}");
+    }
+
     public function getAllProductsAssocByCatalog($catalogId): array
     {
         $query = "SELECT * FROM `product` WHERE `catalog_id` = {$catalogId}";

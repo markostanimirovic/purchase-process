@@ -22,4 +22,13 @@ class OrderFormItemRepository extends BaseModelRepository
     {
         return $this->load(true, "`order_form_id` = {$orderFormId}");
     }
+
+    public function getCatalogIdByOrderFormItem($orderForm) {
+        $id = $orderForm->getId();
+        $query = "SELECT `catalog_id` FROM `order_form_item` AS ofi JOIN `product` AS prod ON (ofi.product_id = prod.id) WHERE " .
+            "ofi.id = {$id}";
+
+        $catalogId = $this->getDb()->query($query, true);
+        return $catalogId['catalog_id'];
+    }
 }

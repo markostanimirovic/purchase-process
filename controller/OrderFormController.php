@@ -8,6 +8,7 @@ use model\OrderForm;
 use model\OrderFormItem;
 use model\Supplier;
 use model\User;
+use modelRepository\CatalogRepository;
 use modelRepository\OrderFormItemRepository;
 use modelRepository\OrderFormRepository;
 use modelRepository\ProductRepository;
@@ -90,6 +91,80 @@ class OrderFormController extends LoginController
 
     }
 
+    public function insertOnExistingAction($id)
+    {
+        $this->accessDenyIfNotIn([User::EMPLOYEE]);
+
+        if (!ctype_digit((string)$id)) {
+            header('Location: /404NotFound/');
+        }
+
+        $orderFormRepository = new OrderFormRepository();
+        $orderForm = $orderFormRepository->loadById((int)$id);
+
+        if (empty($orderForm) || $orderForm->getState() === OrderForm::SAVED) {
+            header('Location: /404NotFound/');
+        }
+
+        $params = array();
+        $params['menu'] = $this->render('menu/employee_menu.php');
+
+        $orderFormItemRepository = new OrderFormItemRepository();
+        $orderFormItems = $orderFormItemRepository->getAllItemsByOrderForm($orderForm->getId());
+        $orderForm->setItems($orderFormItems);
+        $params['orderForm'] = $orderForm;
+
+        $catalogRepository = new CatalogRepository();
+        $catalogs = $catalogRepository->loadForEmployeeBySupplier($orderForm->getSupplier()->getId());
+        $params['catalogs'] = $catalogs;
+
+        $selectedCatalogId = $orderFormItemRepository->getCatalogIdByOrderFormItem($orderForm->getItems()[0]);
+        $params['selectedCatalogId'] = $selectedCatalogId;
+
+        $productRepository = new ProductRepository();
+        $products = $productRepository->getAllProductsByCatalog($selectedCatalogId);
+        $params['products'] = $products;
+
+        echo $this->render('orderForm/insert.php', $params);
+    }
+
+    public function editAction($id)
+    {
+        $this->accessDenyIfNotIn([User::EMPLOYEE]);
+
+        if (!ctype_digit((string)$id)) {
+            header('Location: /404NotFound/');
+        }
+
+        $orderFormRepository = new OrderFormRepository();
+        $orderForm = $orderFormRepository->loadById((int)$id);
+
+        if (empty($orderForm) || $orderForm->getState() !== OrderForm::SAVED) {
+            header('Location: /404NotFound/');
+        }
+
+        $params = array();
+        $params['menu'] = $this->render('menu/employee_menu.php');
+
+        $orderFormItemRepository = new OrderFormItemRepository();
+        $orderFormItems = $orderFormItemRepository->getAllItemsByOrderForm($orderForm->getId());
+        $orderForm->setItems($orderFormItems);
+        $params['orderForm'] = $orderForm;
+
+        $catalogRepository = new CatalogRepository();
+        $catalogs = $catalogRepository->loadForEmployeeBySupplier($orderForm->getSupplier()->getId());
+        $params['catalogs'] = $catalogs;
+
+        $selectedCatalogId = $orderFormItemRepository->getCatalogIdByOrderFormItem($orderForm->getItems()[0]);
+        $params['selectedCatalogId'] = $selectedCatalogId;
+
+        $productRepository = new ProductRepository();
+        $products = $productRepository->getAllProductsByCatalog($selectedCatalogId);
+        $params['products'] = $products;
+
+        echo $this->render('orderForm/edit.php', $params);
+    }
+
     public function insertDraftAction()
     {
         $this->accessDenyIfNotIn([User::EMPLOYEE]);
@@ -114,7 +189,7 @@ class OrderFormController extends LoginController
                 exit();
             }
             if (!ctype_digit((string)$item['quantity']) || ((int)$item['quantity']) <= 0) {
-                echo json_encode('{"type": "error", "messages": ["Količina da bude samo pozitivan ceo broj."]}', JSON_UNESCAPED_UNICODE);
+                echo json_encode('{"type": "error", "messages": ["Količina može da bude samo pozitivan ceo broj."]}', JSON_UNESCAPED_UNICODE);
                 exit();
             }
         }
