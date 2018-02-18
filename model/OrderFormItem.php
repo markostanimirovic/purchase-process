@@ -9,10 +9,16 @@ use modelRepository\ProductRepository;
 
 class OrderFormItem extends BaseModel
 {
+    const STATE_N = 0;
+    const STATE_INSERT = 1;
+    const STATE_UPDATE = 2;
+    const STATE_DELETE = 3;
+
     protected $quantity;
     protected $amount;
     protected $orderForm;
     protected $product;
+    protected $state;
 
     public function getQuantity()
     {
@@ -52,6 +58,16 @@ class OrderFormItem extends BaseModel
     public function setProduct($product)
     {
         $this->product = $product;
+    }
+
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    public function setState($state)
+    {
+        $this->state = $state;
     }
 
     public function populate(array $dbRow): BaseModel

@@ -53,7 +53,8 @@ $(document).ready(function () {
         info: false,
         paging: false,
         columnDefs: [
-            {targets: -1, orderable: false}
+            {targets: -1, orderable: false},
+            {targets: -2, visible: false, searchable: false}
         ],
         language: {
             "sProcessing": "Procesiranje u toku...",

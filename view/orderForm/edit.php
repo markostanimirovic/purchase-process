@@ -135,6 +135,7 @@ ob_start();
                                 <th title="Količinu možete menjati">Količina <i class="fa fa-pencil"
                                                                                 aria-hidden="true"></i></th>
                                 <th>Iznos</th>
+                                <th>State</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -149,6 +150,7 @@ ob_start();
                                            data-price="<?= $item->getProduct()->getPrice(); ?>"><?= $item->getQuantity(); ?></a>
                                     </td>
                                     <td><?= $item->getAmount(); ?></td>
+                                    <td>0</td>
                                     <td>
                                         <button type="button" class="delete-row btn btn-danger">
                                             <i class="fa fa-trash-o" aria-hidden="true"></i>

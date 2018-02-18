@@ -32,7 +32,7 @@ CREATE TABLE `catalog` (
   PRIMARY KEY (`id`),
   KEY `supplier_fk` (`supplier_id`),
   CONSTRAINT `supplier_fk` FOREIGN KEY (`supplier_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `order_form` */
 
@@ -50,7 +50,7 @@ CREATE TABLE `order_form` (
   PRIMARY KEY (`id`),
   KEY `supplier_id` (`supplier_id`),
   CONSTRAINT `order_form_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `order_form_item` */
 
@@ -69,7 +69,7 @@ CREATE TABLE `order_form_item` (
   KEY `product_id` (`product_id`),
   CONSTRAINT `order_form_item_ibfk_1` FOREIGN KEY (`order_form_id`) REFERENCES `order_form` (`id`),
   CONSTRAINT `order_form_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `place` */
 
@@ -94,7 +94,7 @@ CREATE TABLE `position` (
   `deactivated` tinyint(1) DEFAULT '0',
   `name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `product` */
 
@@ -110,7 +110,7 @@ CREATE TABLE `product` (
   `price` decimal(12,2) DEFAULT NULL,
   `catalog_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `user` */
 
@@ -140,7 +140,7 @@ CREATE TABLE `user` (
   KEY `position_fk` (`employee_position_id`),
   CONSTRAINT `place_fk` FOREIGN KEY (`supplier_place_id`) REFERENCES `place` (`id`),
   CONSTRAINT `position_fk` FOREIGN KEY (`employee_position_id`) REFERENCES `position` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
